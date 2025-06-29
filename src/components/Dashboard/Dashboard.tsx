@@ -20,14 +20,14 @@ export default function Dashboard({ routes, alerts, slaData, slaTargets, onRoute
   const totalTroubleTickets = routes.reduce((sum, route) => sum + route.troubleTickets, 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Network Overview</h2>
-        <p className="text-gray-600">Monitor the health and status of all fiber optic routes</p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Network Overview</h2>
+        <p className="text-sm sm:text-base text-gray-600">Monitor the health and status of all fiber optic routes</p>
       </div>
 
       {/* SLA Monitoring Section */}
-      <div className="space-y-6 mb-8">
+      <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
         <SLAChart data={slaData} />
         <SLAKanban targets={slaTargets} />
       </div>
@@ -40,10 +40,10 @@ export default function Dashboard({ routes, alerts, slaData, slaTargets, onRoute
         totalTroubleTickets={totalTroubleTickets}
       />
 
-      {/* Route Status Grid */}
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Route Status</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+      {/* Route Status Grid - Mobile First Responsive */}
+      <div className="mb-6 sm:mb-8">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Route Status</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3 sm:gap-4">
           {routes.map((route) => (
             <RouteCard
               key={route.id}

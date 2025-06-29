@@ -80,143 +80,141 @@ export default function RouteCard({ route, onClick }: RouteCardProps) {
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-blue-300"
+      className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-blue-300 h-auto"
     >
       {/* Header with Route Name and Status */}
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-base font-semibold text-gray-900">{route.name}</h3>
-        <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(route.status)}`}>
+        <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">{route.name}</h3>
+        <span className={`px-1.5 py-0.5 rounded text-xs font-medium border ${getStatusColor(route.status)} whitespace-nowrap ml-2`}>
           {getStatusText(route.status)}
         </span>
       </div>
 
       {/* Start - End Location */}
       <div className="flex items-center justify-between mb-2 p-1.5 bg-gray-50 rounded">
-        <div className="flex items-center space-x-1">
-          <MapPin className="h-3 w-3 text-gray-400" />
-          <span className="text-xs text-gray-600">{route.location.start}</span>
+        <div className="flex items-center space-x-1 min-w-0 flex-1">
+          <MapPin className="h-3 w-3 text-gray-400 flex-shrink-0" />
+          <span className="text-xs text-gray-600 truncate">{route.location.start}</span>
         </div>
-        <span className="text-gray-400 text-xs">→</span>
-        <span className="text-xs text-gray-600">{route.location.end}</span>
+        <span className="text-gray-400 text-xs mx-1 flex-shrink-0">→</span>
+        <span className="text-xs text-gray-600 truncate min-w-0 flex-1 text-right">{route.location.end}</span>
       </div>
 
       {/* Total Length and Fiber */}
       <div className="grid grid-cols-2 gap-2 mb-2 text-xs">
-        <div className="text-center">
+        <div className="text-center bg-gray-50 rounded p-1">
           <p className="text-gray-500">Length</p>
-          <p className="font-medium text-gray-900">{totalLength.toFixed(1)} km</p>
+          <p className="font-semibold text-gray-900">{totalLength.toFixed(1)} km</p>
         </div>
-        <div className="text-center">
+        <div className="text-center bg-gray-50 rounded p-1">
           <p className="text-gray-500">Fibers</p>
-          <p className="font-medium text-gray-900">{route.fiberCount}</p>
+          <p className="font-semibold text-gray-900">{route.fiberCount}</p>
         </div>
       </div>
 
-      {/* Links Detail */}
+      {/* Links Detail - Compact */}
       <div className="mb-2">
-        <h4 className="text-xs font-medium text-gray-500 mb-1">Links ({route.links.length})</h4>
+        <div className="flex items-center justify-between mb-1">
+          <h4 className="text-xs font-medium text-gray-500">Links</h4>
+          <span className="text-xs text-gray-400">({route.links.length})</span>
+        </div>
         <div className="space-y-1">
-          {route.links.slice(0, 2).map((link) => (
-            <div key={link.id} className="flex items-center justify-between text-xs bg-gray-50 rounded p-1.5">
-              <span className="font-medium text-gray-700 truncate">{link.name}</span>
-              <div className="flex items-center space-x-1">
-                <span className="text-gray-600">{link.length}km</span>
+          {route.links.slice(0, 1).map((link) => (
+            <div key={link.id} className="flex items-center justify-between text-xs bg-blue-50 rounded p-1">
+              <span className="font-medium text-blue-700 truncate flex-1 mr-2">{link.name}</span>
+              <div className="flex items-center space-x-1 flex-shrink-0">
+                <span className="text-blue-600">{link.length}km</span>
                 <span className={`font-medium ${getLossColor(link.totalLoss)}`}>
                   {link.totalLoss}dB
                 </span>
               </div>
             </div>
           ))}
-          {route.links.length > 2 && (
-            <div className="text-xs text-gray-500 text-center">
-              +{route.links.length - 2} more links
+          {route.links.length > 1 && (
+            <div className="text-xs text-gray-500 text-center bg-gray-50 rounded p-1">
+              +{route.links.length - 1} more
             </div>
           )}
         </div>
       </div>
 
-      {/* Assets Detail */}
+      {/* Assets Detail - Compact Grid */}
       <div className="mb-2">
         <h4 className="text-xs font-medium text-gray-500 mb-1">Assets</h4>
         <div className="grid grid-cols-4 gap-1">
-          <div className="text-center p-1.5 bg-blue-50 rounded">
-            <Building2 className="h-3 w-3 text-blue-600 mx-auto mb-0.5" />
-            <p className="text-xs text-blue-600 font-medium">HH</p>
+          <div className="text-center p-1 bg-blue-50 rounded">
+            <Building2 className="h-3 w-3 text-blue-600 mx-auto" />
             <p className="text-xs font-bold text-blue-700">{route.assets.handhole}</p>
           </div>
-          <div className="text-center p-1.5 bg-green-50 rounded">
-            <Boxes className="h-3 w-3 text-green-600 mx-auto mb-0.5" />
-            <p className="text-xs text-green-600 font-medium">ODC</p>
+          <div className="text-center p-1 bg-green-50 rounded">
+            <Boxes className="h-3 w-3 text-green-600 mx-auto" />
             <p className="text-xs font-bold text-green-700">{route.assets.odc}</p>
           </div>
-          <div className="text-center p-1.5 bg-orange-50 rounded">
-            <Zap className="h-3 w-3 text-orange-600 mx-auto mb-0.5" />
-            <p className="text-xs text-orange-600 font-medium">Pole</p>
+          <div className="text-center p-1 bg-orange-50 rounded">
+            <Zap className="h-3 w-3 text-orange-600 mx-auto" />
             <p className="text-xs font-bold text-orange-700">{route.assets.pole}</p>
           </div>
-          <div className="text-center p-1.5 bg-purple-50 rounded">
-            <JCIcon className="h-3 w-3 text-purple-600 mx-auto mb-0.5" />
-            <p className="text-xs text-purple-600 font-medium">JC</p>
+          <div className="text-center p-1 bg-purple-50 rounded">
+            <JCIcon className="h-3 w-3 text-purple-600 mx-auto" />
             <p className="text-xs font-bold text-purple-700">{route.assets.jc}</p>
           </div>
         </div>
       </div>
 
-      {/* Key Metrics Grid */}
+      {/* Metrics Row 1: Total Loss & Average SLA */}
       <div className="grid grid-cols-2 gap-2 mb-2">
-        {/* Total Loss */}
         <div className="text-center p-1.5 bg-gray-50 rounded">
-          <div className="flex items-center justify-center mb-0.5">
+          <div className="flex items-center justify-center space-x-1 mb-0.5">
             <Signal className={`h-3 w-3 ${getLossColor(totalLoss)}`} />
+            <p className="text-xs text-gray-600 font-medium">Loss</p>
           </div>
-          <p className="text-xs text-gray-600 font-medium">Total Loss</p>
           <p className={`text-xs font-bold ${getLossColor(totalLoss)}`}>
-            {totalLoss.toFixed(1)} dB
+            {totalLoss.toFixed(1)}dB
           </p>
         </div>
 
-        {/* Average SLA */}
         <div className="text-center p-1.5 bg-green-50 rounded">
-          <div className="flex items-center justify-center mb-0.5">
+          <div className="flex items-center justify-center space-x-1 mb-0.5">
             <TrendingUp className={`h-3 w-3 ${getSLAColor(averageSLAHours)}`} />
+            <p className="text-xs text-green-600 font-medium">SLA</p>
           </div>
-          <p className="text-xs text-green-600 font-medium">Avg SLA</p>
           <p className={`text-xs font-bold ${getSLAColor(averageSLAHours)}`}>
             {averageSLAHours.toFixed(1)}h
           </p>
         </div>
       </div>
 
-      {/* Trouble Tickets - Split */}
+      {/* Metrics Row 2: Trouble Tickets */}
       <div className="grid grid-cols-2 gap-2 mb-2">
-        {/* Last Week Tickets */}
         <div className="text-center p-1.5 bg-blue-50 rounded">
-          <div className="flex items-center justify-center mb-0.5">
+          <div className="flex items-center justify-center space-x-1 mb-0.5">
             <AlertCircle className="h-3 w-3 text-blue-600" />
+            <p className="text-xs text-blue-600 font-medium">Last</p>
           </div>
-          <p className="text-xs text-blue-600 font-medium">Last Week</p>
           <p className="text-xs font-bold text-blue-700">{ticketsLastWeek}</p>
         </div>
 
-        {/* This Week Tickets */}
         <div className="text-center p-1.5 bg-orange-50 rounded">
-          <div className="flex items-center justify-center mb-0.5">
+          <div className="flex items-center justify-center space-x-1 mb-0.5">
             <AlertCircle className={`h-3 w-3 ${getTroubleTicketColor(ticketsThisWeek)}`} />
+            <p className="text-xs text-orange-600 font-medium">This</p>
           </div>
-          <p className="text-xs text-orange-600 font-medium">This Week</p>
           <p className={`text-xs font-bold ${getTroubleTicketColor(ticketsThisWeek)}`}>
             {ticketsThisWeek}
           </p>
         </div>
       </div>
 
-      {/* Next Maintenance */}
+      {/* Next Maintenance - Compact */}
       <div className="border-t border-gray-100 pt-1.5">
         <div className="flex items-center justify-center">
           <div className="flex items-center space-x-1">
             <Calendar className="h-3 w-3 text-gray-400" />
             <span className="text-xs text-gray-500">
-              Next: {new Date(route.nextMaintenance).toLocaleDateString()}
+              {new Date(route.nextMaintenance).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+              })}
             </span>
           </div>
         </div>
