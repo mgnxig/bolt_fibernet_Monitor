@@ -641,12 +641,15 @@ export const troubleTickets: TroubleTicket[] = [
         materialName: 'Dome Closure 48F IP68',
         quantity: 1,
         unit: 'piece',
-        unitCost: 125000,
-        totalCost: 125000,
         supplier: 'CommScope',
         partNumber: 'CS-DC-48F-IP68',
         usedDate: '2024-02-20T14:00:00Z',
-        notes: 'Replacement for water-damaged closure'
+        notes: 'Replacement for water-damaged closure',
+        coordinates: {
+          longitude: 106.8123,
+          latitude: -6.1756
+        },
+        location: 'Joint Closure CHE-008 - Hotel Indonesia Roundabout'
       },
       {
         id: 'mat-002',
@@ -655,11 +658,14 @@ export const troubleTickets: TroubleTicket[] = [
         materialName: 'Splice Tray 12F',
         quantity: 2,
         unit: 'piece',
-        unitCost: 45000,
-        totalCost: 90000,
         supplier: 'Corning',
         partNumber: 'COR-ST-12F',
-        usedDate: '2024-02-20T14:30:00Z'
+        usedDate: '2024-02-20T14:30:00Z',
+        coordinates: {
+          longitude: 106.8123,
+          latitude: -6.1756
+        },
+        location: 'Joint Closure CHE-008'
       },
       {
         id: 'mat-003',
@@ -668,12 +674,15 @@ export const troubleTickets: TroubleTicket[] = [
         materialName: 'Single Mode Fiber G.652D',
         quantity: 2.5,
         unit: 'meter',
-        unitCost: 15000,
-        totalCost: 37500,
         supplier: 'Furukawa',
         partNumber: 'FUR-SMF-G652D',
         usedDate: '2024-02-20T15:00:00Z',
-        notes: 'Replacement fiber for damaged section'
+        notes: 'Replacement fiber for damaged section',
+        coordinates: {
+          longitude: 106.8123,
+          latitude: -6.1756
+        },
+        location: 'Splice point near JC CHE-008'
       }
     ],
     activities: [
@@ -791,11 +800,14 @@ export const troubleTickets: TroubleTicket[] = [
         materialName: 'Fiber Optic Cleaning Kit',
         quantity: 1,
         unit: 'set',
-        unitCost: 85000,
-        totalCost: 85000,
         supplier: 'Fluke Networks',
         partNumber: 'FLU-FCK-001',
-        usedDate: '2024-02-20T09:30:00Z'
+        usedDate: '2024-02-20T09:30:00Z',
+        coordinates: {
+          longitude: 106.8234,
+          latitude: -6.1944
+        },
+        location: 'ODC Central Hub Alpha - Equipment Room'
       },
       {
         id: 'mat-005',
@@ -804,11 +816,14 @@ export const troubleTickets: TroubleTicket[] = [
         materialName: 'Cleaning Wipes (Box of 100)',
         quantity: 1,
         unit: 'box',
-        unitCost: 25000,
-        totalCost: 25000,
         supplier: 'Thorlabs',
         partNumber: 'THO-CW-100',
-        usedDate: '2024-02-20T09:30:00Z'
+        usedDate: '2024-02-20T09:30:00Z',
+        coordinates: {
+          longitude: 106.8234,
+          latitude: -6.1944
+        },
+        location: 'ODC Central Hub Alpha'
       }
     ],
     activities: [
@@ -960,12 +975,15 @@ export const troubleTickets: TroubleTicket[] = [
         materialName: 'Optical Amplifier EDFA 20dB',
         quantity: 1,
         unit: 'piece',
-        unitCost: 2500000,
-        totalCost: 2500000,
         supplier: 'Huawei',
         partNumber: 'HW-EDFA-20DB',
         usedDate: '2024-02-19T15:00:00Z',
-        notes: 'Replacement for failed unit'
+        notes: 'Replacement for failed unit',
+        coordinates: {
+          longitude: 106.8123,
+          latitude: -6.1756
+        },
+        location: 'Central Hub - Equipment Room'
       },
       {
         id: 'mat-007',
@@ -974,11 +992,14 @@ export const troubleTickets: TroubleTicket[] = [
         materialName: 'SC/APC Patch Cord 2m',
         quantity: 4,
         unit: 'piece',
-        unitCost: 35000,
-        totalCost: 140000,
         supplier: 'Corning',
         partNumber: 'COR-PC-SC-2M',
-        usedDate: '2024-02-19T15:30:00Z'
+        usedDate: '2024-02-19T15:30:00Z',
+        coordinates: {
+          longitude: 106.8123,
+          latitude: -6.1756
+        },
+        location: 'Central Hub - Equipment Room'
       }
     ],
     activities: [

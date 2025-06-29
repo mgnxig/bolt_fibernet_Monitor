@@ -110,12 +110,16 @@ export interface MaterialUsage {
   materialName: string;
   quantity: number;
   unit: 'meter' | 'piece' | 'roll' | 'box' | 'set';
-  unitCost: number;
-  totalCost: number;
   supplier?: string;
   partNumber?: string;
   usedDate: string;
   notes?: string;
+  // Coordinates for closures and equipment
+  coordinates?: {
+    longitude: number;
+    latitude: number;
+  };
+  location?: string; // Description of where the material was used
 }
 
 export interface TroubleTicket {

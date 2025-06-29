@@ -4,7 +4,8 @@ import {
   Calendar, Clock, User, MapPin, AlertTriangle, 
   CheckCircle, PlayCircle, XCircle, Eye, Filter,
   Search, Package, Cable, Wrench, Image, 
-  DollarSign, FileText, ChevronDown, ChevronRight
+  FileText, ChevronDown, ChevronRight, Edit3,
+  Save, X, Plus, Trash2, Navigation
 } from 'lucide-react';
 import TroubleTicketDetail from './TroubleTicketDetail';
 
@@ -24,6 +25,8 @@ export default function TroubleTicketManagement({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [routeFilter, setRouteFilter] = useState<string>('all');
   const [expandedRoutes, setExpandedRoutes] = useState<Set<string>>(new Set());
+  const [editingMaterial, setEditingMaterial] = useState<string | null>(null);
+  const [newMaterial, setNewMaterial] = useState<{ [ticketId: string]: Partial<MaterialUsage> }>({});
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -73,10 +76,6 @@ export default function TroubleTicketManagement({
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
 
-  const calculateMaterialCost = (materials: MaterialUsage[]) => {
-    return materials.reduce((total, material) => total + material.totalCost, 0);
-  };
-
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = searchTerm === '' || 
       ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -107,6 +106,93 @@ export default function TroubleTicketManagement({
       newExpanded.add(routeId);
     }
     setExpandedRoutes(newExpanded);
+  };
+
+  const startEditingMaterial = (materialId: string) => {
+    setEditingMaterial(materialId);
+  };
+
+  const saveEditingMaterial = (ticketId: string, materialId: string, updatedMaterial: MaterialUsage) => {
+    const ticket = tickets.find(t => t.id === ticketId);
+    if (ticket) {
+      const updatedMaterials = ticket.materialUsage.map(m => 
+        m.id === materialId ? updatedMaterial : m
+      );
+      onUpdateTicket(ticketId, { materialUsage: updatedMaterials });
+    }
+    setEditingMaterial(null);
+  };
+
+  const deleteMaterial = (ticketId: string, materialId: string) => {
+    const ticket = tickets.find(t => t.id === ticketId);
+    if (ticket) {
+      const updatedMaterials = ticket.materialUsage.filter(m => m.id !== materialId);
+      onUpdateTicket(ticketId, { materialUsage: updatedMaterials });
+    }
+  };
+
+  const addNewMaterial = (ticketId: string) => {
+    setNewMaterial({
+      ...newMaterial,
+      [ticketId]: {
+        materialType: 'closure',
+        materialName: '',
+        quantity: 1,
+        unit: 'piece',
+        supplier: '',
+        partNumber: '',
+        usedDate: new Date().toISOString().split('T')[0],
+        coordinates: { longitude: 0, latitude: 0 },
+        location: ''
+      }
+    });
+  };
+
+  const saveNewMaterial = (ticketId: string) => {
+    const material = newMaterial[ticketId];
+    if (material && material.materialName) {
+      const newMat: MaterialUsage = {
+        id: `mat-${Date.now()}`,
+        ticketId,
+        materialType: material.materialType || 'closure',
+        materialName: material.materialName,
+        quantity: material.quantity || 1,
+        unit: material.unit || 'piece',
+        supplier: material.supplier || '',
+        partNumber: material.partNumber || '',
+        usedDate: material.usedDate || new Date().toISOString().split('T')[0],
+        coordinates: material.coordinates,
+        location: material.location || '',
+        notes: material.notes || ''
+      };
+
+      const ticket = tickets.find(t => t.id === ticketId);
+      if (ticket) {
+        const updatedMaterials = [...ticket.materialUsage, newMat];
+        onUpdateTicket(ticketId, { materialUsage: updatedMaterials });
+      }
+
+      // Clear the new material form
+      const updatedNewMaterial = { ...newMaterial };
+      delete updatedNewMaterial[ticketId];
+      setNewMaterial(updatedNewMaterial);
+    }
+  };
+
+  const cancelNewMaterial = (ticketId: string) => {
+    const updatedNewMaterial = { ...newMaterial };
+    delete updatedNewMaterial[ticketId];
+    setNewMaterial(updatedNewMaterial);
+  };
+
+  const updateNewMaterial = (ticketId: string, field: string, value: any) => {
+    setNewMaterial({
+      ...newMaterial,
+      [ticketId]: {
+        ...newMaterial[ticketId],
+        [field]: value
+      }
+    });
   };
 
   if (selectedTicket) {
@@ -187,9 +273,6 @@ export default function TroubleTicketManagement({
         {Object.entries(ticketsByRoute).map(([routeId, routeTickets]) => {
           const isExpanded = expandedRoutes.has(routeId);
           const routeName = getRouteName(routeId);
-          const totalMaterialCost = routeTickets.reduce((total, ticket) => 
-            total + calculateMaterialCost(ticket.materialUsage), 0
-          );
 
           return (
             <div key={routeId} className="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -210,14 +293,6 @@ export default function TroubleTicketManagement({
                       {routeTickets.length} tickets
                     </span>
                   </div>
-                  <div className="flex items-center space-x-4 text-sm">
-                    <div className="flex items-center space-x-1">
-                      <DollarSign className="h-4 w-4 text-green-600" />
-                      <span className="text-gray-700">
-                        Total Cost: Rp {totalMaterialCost.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
 
@@ -229,7 +304,6 @@ export default function TroubleTicketManagement({
                     const statusColor = getStatusColor(ticket.status);
                     const priorityColor = getPriorityColor(ticket.priority);
                     const repairTypeColor = getRepairTypeColor(ticket.repairType);
-                    const materialCost = calculateMaterialCost(ticket.materialUsage);
 
                     return (
                       <div key={ticket.id} className="p-6 hover:bg-gray-50 transition-colors">
@@ -297,10 +371,10 @@ export default function TroubleTicketManagement({
                                   <span className="text-xs font-medium text-gray-700">Materials & Photos</span>
                                 </div>
                                 <p className="text-sm font-medium text-gray-900">
-                                  Rp {materialCost.toLocaleString()}
+                                  {ticket.materialUsage.length} items
                                 </p>
                                 <p className="text-xs text-gray-600">
-                                  {ticket.materialUsage.length} items, {ticket.photos.length} photos
+                                  {ticket.photos.length} photos
                                 </p>
                               </div>
                             </div>
@@ -367,12 +441,168 @@ export default function TroubleTicketManagement({
                         </div>
 
                         {/* Material Usage Table */}
-                        {ticket.materialUsage.length > 0 && (
-                          <div className="mt-4 border-t border-gray-100 pt-4">
-                            <h5 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                        <div className="mt-4 border-t border-gray-100 pt-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="text-sm font-medium text-gray-700 flex items-center">
                               <Package className="h-4 w-4 mr-1" />
-                              Material Usage
+                              Material Usage ({ticket.materialUsage.length})
                             </h5>
+                            {!newMaterial[ticket.id] && (
+                              <button
+                                onClick={() => addNewMaterial(ticket.id)}
+                                className="flex items-center space-x-1 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                              >
+                                <Plus className="h-3 w-3" />
+                                <span>Add Material</span>
+                              </button>
+                            )}
+                          </div>
+
+                          {/* New Material Form */}
+                          {newMaterial[ticket.id] && (
+                            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                              <div className="flex items-center justify-between mb-3">
+                                <h6 className="text-sm font-medium text-blue-900">Add New Material</h6>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => saveNewMaterial(ticket.id)}
+                                    className="flex items-center space-x-1 px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                                  >
+                                    <Save className="h-3 w-3" />
+                                    <span>Save</span>
+                                  </button>
+                                  <button
+                                    onClick={() => cancelNewMaterial(ticket.id)}
+                                    className="flex items-center space-x-1 px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                                  >
+                                    <X className="h-3 w-3" />
+                                    <span>Cancel</span>
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                                  <select
+                                    value={newMaterial[ticket.id]?.materialType || 'closure'}
+                                    onChange={(e) => updateNewMaterial(ticket.id, 'materialType', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                  >
+                                    <option value="closure">Closure</option>
+                                    <option value="fiber-cable">Fiber Cable</option>
+                                    <option value="connector">Connector</option>
+                                    <option value="splice-tray">Splice Tray</option>
+                                    <option value="patch-cord">Patch Cord</option>
+                                    <option value="other">Other</option>
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Material Name</label>
+                                  <input
+                                    type="text"
+                                    value={newMaterial[ticket.id]?.materialName || ''}
+                                    onChange={(e) => updateNewMaterial(ticket.id, 'materialName', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                    placeholder="Material name"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="0.1"
+                                    value={newMaterial[ticket.id]?.quantity || 1}
+                                    onChange={(e) => updateNewMaterial(ticket.id, 'quantity', parseFloat(e.target.value) || 1)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Unit</label>
+                                  <select
+                                    value={newMaterial[ticket.id]?.unit || 'piece'}
+                                    onChange={(e) => updateNewMaterial(ticket.id, 'unit', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                  >
+                                    <option value="piece">Piece</option>
+                                    <option value="meter">Meter</option>
+                                    <option value="roll">Roll</option>
+                                    <option value="box">Box</option>
+                                    <option value="set">Set</option>
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Longitude</label>
+                                  <input
+                                    type="number"
+                                    step="any"
+                                    value={newMaterial[ticket.id]?.coordinates?.longitude || 0}
+                                    onChange={(e) => updateNewMaterial(ticket.id, 'coordinates', {
+                                      ...newMaterial[ticket.id]?.coordinates,
+                                      longitude: parseFloat(e.target.value) || 0
+                                    })}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                    placeholder="106.xxxx"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Latitude</label>
+                                  <input
+                                    type="number"
+                                    step="any"
+                                    value={newMaterial[ticket.id]?.coordinates?.latitude || 0}
+                                    onChange={(e) => updateNewMaterial(ticket.id, 'coordinates', {
+                                      ...newMaterial[ticket.id]?.coordinates,
+                                      latitude: parseFloat(e.target.value) || 0
+                                    })}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                    placeholder="-6.xxxx"
+                                  />
+                                </div>
+
+                                <div className="md:col-span-3">
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Location Description</label>
+                                  <input
+                                    type="text"
+                                    value={newMaterial[ticket.id]?.location || ''}
+                                    onChange={(e) => updateNewMaterial(ticket.id, 'location', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                    placeholder="Description of where material was used"
+                                  />
+                                </div>
+
+                                <div className="md:col-span-2">
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Supplier</label>
+                                  <input
+                                    type="text"
+                                    value={newMaterial[ticket.id]?.supplier || ''}
+                                    onChange={(e) => updateNewMaterial(ticket.id, 'supplier', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                    placeholder="Supplier name"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Part Number</label>
+                                  <input
+                                    type="text"
+                                    value={newMaterial[ticket.id]?.partNumber || ''}
+                                    onChange={(e) => updateNewMaterial(ticket.id, 'partNumber', e.target.value)}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                    placeholder="Part number"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {ticket.materialUsage.length > 0 ? (
                             <div className="overflow-x-auto">
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
@@ -384,13 +614,16 @@ export default function TroubleTicketManagement({
                                       Quantity
                                     </th>
                                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                      Unit Cost
+                                      Coordinates
                                     </th>
                                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                      Total Cost
+                                      Location
                                     </th>
                                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                       Supplier
+                                    </th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      Actions
                                     </th>
                                   </tr>
                                 </thead>
@@ -398,45 +631,191 @@ export default function TroubleTicketManagement({
                                   {ticket.materialUsage.map((material) => (
                                     <tr key={material.id} className="hover:bg-gray-50">
                                       <td className="px-3 py-2 whitespace-nowrap">
-                                        <div>
-                                          <div className="text-sm font-medium text-gray-900">
-                                            {material.materialName}
+                                        {editingMaterial === material.id ? (
+                                          <div className="space-y-1">
+                                            <input
+                                              type="text"
+                                              defaultValue={material.materialName}
+                                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                              onBlur={(e) => {
+                                                const updatedMaterial = { ...material, materialName: e.target.value };
+                                                saveEditingMaterial(ticket.id, material.id, updatedMaterial);
+                                              }}
+                                            />
+                                            <input
+                                              type="text"
+                                              defaultValue={material.partNumber}
+                                              placeholder="Part number"
+                                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                              onBlur={(e) => {
+                                                const updatedMaterial = { ...material, partNumber: e.target.value };
+                                                saveEditingMaterial(ticket.id, material.id, updatedMaterial);
+                                              }}
+                                            />
                                           </div>
-                                          <div className="text-xs text-gray-500">
-                                            {material.partNumber}
+                                        ) : (
+                                          <div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                              {material.materialName}
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                              {material.partNumber}
+                                            </div>
                                           </div>
+                                        )}
+                                      </td>
+                                      <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                        {editingMaterial === material.id ? (
+                                          <div className="flex space-x-1">
+                                            <input
+                                              type="number"
+                                              step="0.1"
+                                              defaultValue={material.quantity}
+                                              className="w-16 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                              onBlur={(e) => {
+                                                const updatedMaterial = { ...material, quantity: parseFloat(e.target.value) || 1 };
+                                                saveEditingMaterial(ticket.id, material.id, updatedMaterial);
+                                              }}
+                                            />
+                                            <select
+                                              defaultValue={material.unit}
+                                              className="px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                              onChange={(e) => {
+                                                const updatedMaterial = { ...material, unit: e.target.value as any };
+                                                saveEditingMaterial(ticket.id, material.id, updatedMaterial);
+                                              }}
+                                            >
+                                              <option value="piece">Piece</option>
+                                              <option value="meter">Meter</option>
+                                              <option value="roll">Roll</option>
+                                              <option value="box">Box</option>
+                                              <option value="set">Set</option>
+                                            </select>
+                                          </div>
+                                        ) : (
+                                          `${material.quantity} ${material.unit}`
+                                        )}
+                                      </td>
+                                      <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                        {editingMaterial === material.id ? (
+                                          <div className="space-y-1">
+                                            <input
+                                              type="number"
+                                              step="any"
+                                              defaultValue={material.coordinates?.longitude || 0}
+                                              placeholder="Longitude"
+                                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                              onBlur={(e) => {
+                                                const updatedMaterial = { 
+                                                  ...material, 
+                                                  coordinates: { 
+                                                    ...material.coordinates, 
+                                                    longitude: parseFloat(e.target.value) || 0 
+                                                  } 
+                                                };
+                                                saveEditingMaterial(ticket.id, material.id, updatedMaterial);
+                                              }}
+                                            />
+                                            <input
+                                              type="number"
+                                              step="any"
+                                              defaultValue={material.coordinates?.latitude || 0}
+                                              placeholder="Latitude"
+                                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                              onBlur={(e) => {
+                                                const updatedMaterial = { 
+                                                  ...material, 
+                                                  coordinates: { 
+                                                    ...material.coordinates, 
+                                                    latitude: parseFloat(e.target.value) || 0 
+                                                  } 
+                                                };
+                                                saveEditingMaterial(ticket.id, material.id, updatedMaterial);
+                                              }}
+                                            />
+                                          </div>
+                                        ) : (
+                                          material.coordinates ? (
+                                            <div className="flex items-center space-x-1">
+                                              <Navigation className="h-3 w-3 text-gray-400" />
+                                              <div className="text-xs">
+                                                <div>{material.coordinates.longitude.toFixed(4)}</div>
+                                                <div>{material.coordinates.latitude.toFixed(4)}</div>
+                                              </div>
+                                            </div>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">No coordinates</span>
+                                          )
+                                        )}
+                                      </td>
+                                      <td className="px-3 py-2 text-sm text-gray-900">
+                                        {editingMaterial === material.id ? (
+                                          <input
+                                            type="text"
+                                            defaultValue={material.location}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                            onBlur={(e) => {
+                                              const updatedMaterial = { ...material, location: e.target.value };
+                                              saveEditingMaterial(ticket.id, material.id, updatedMaterial);
+                                            }}
+                                          />
+                                        ) : (
+                                          <div className="max-w-xs truncate" title={material.location}>
+                                            {material.location || 'No location specified'}
+                                          </div>
+                                        )}
+                                      </td>
+                                      <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                        {editingMaterial === material.id ? (
+                                          <input
+                                            type="text"
+                                            defaultValue={material.supplier}
+                                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                                            onBlur={(e) => {
+                                              const updatedMaterial = { ...material, supplier: e.target.value };
+                                              saveEditingMaterial(ticket.id, material.id, updatedMaterial);
+                                            }}
+                                          />
+                                        ) : (
+                                          material.supplier || 'N/A'
+                                        )}
+                                      </td>
+                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                        <div className="flex items-center space-x-2">
+                                          {editingMaterial === material.id ? (
+                                            <button
+                                              onClick={() => setEditingMaterial(null)}
+                                              className="text-green-600 hover:text-green-800"
+                                            >
+                                              <Save className="h-4 w-4" />
+                                            </button>
+                                          ) : (
+                                            <button
+                                              onClick={() => startEditingMaterial(material.id)}
+                                              className="text-blue-600 hover:text-blue-800"
+                                            >
+                                              <Edit3 className="h-4 w-4" />
+                                            </button>
+                                          )}
+                                          <button
+                                            onClick={() => deleteMaterial(ticket.id, material.id)}
+                                            className="text-red-600 hover:text-red-800"
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </button>
                                         </div>
-                                      </td>
-                                      <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                        {material.quantity} {material.unit}
-                                      </td>
-                                      <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                        Rp {material.unitCost.toLocaleString()}
-                                      </td>
-                                      <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        Rp {material.totalCost.toLocaleString()}
-                                      </td>
-                                      <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                                        {material.supplier}
                                       </td>
                                     </tr>
                                   ))}
                                 </tbody>
-                                <tfoot className="bg-gray-50">
-                                  <tr>
-                                    <td colSpan={3} className="px-3 py-2 text-sm font-medium text-gray-900 text-right">
-                                      Total Material Cost:
-                                    </td>
-                                    <td className="px-3 py-2 text-sm font-bold text-gray-900">
-                                      Rp {materialCost.toLocaleString()}
-                                    </td>
-                                    <td></td>
-                                  </tr>
-                                </tfoot>
                               </table>
                             </div>
-                          </div>
-                        )}
+                          ) : (
+                            <div className="text-center py-4 text-gray-500 text-sm">
+                              No materials used for this ticket
+                            </div>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
