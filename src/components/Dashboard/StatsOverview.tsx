@@ -7,6 +7,9 @@ interface StatsOverviewProps {
   criticalRoutes: number;
   maintenanceRoutes: number;
   totalTroubleTickets: number;
+  onClosureUsageClick?: () => void;
+  onCableUsageClick?: () => void;
+  onOpenTicketsClick?: () => void;
 }
 
 export default function StatsOverview({
@@ -14,7 +17,10 @@ export default function StatsOverview({
   operationalRoutes,
   criticalRoutes,
   maintenanceRoutes,
-  totalTroubleTickets
+  totalTroubleTickets,
+  onClosureUsageClick,
+  onCableUsageClick,
+  onOpenTicketsClick
 }: StatsOverviewProps) {
   // Mock data for closure and cable usage
   const totalClosuresUsed = 245; // Total closures used for trouble tickets
@@ -29,7 +35,9 @@ export default function StatsOverview({
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-200',
-      description: 'Total closures used for trouble tickets'
+      description: 'Total closures used for trouble tickets',
+      onClick: onClosureUsageClick,
+      clickable: true
     },
     {
       name: 'Cable Usage',
@@ -39,7 +47,9 @@ export default function StatsOverview({
       color: 'text-green-600',
       bgColor: 'bg-green-50',
       borderColor: 'border-green-200',
-      description: 'Total cable length used for trouble tickets'
+      description: 'Total cable length used for trouble tickets',
+      onClick: onCableUsageClick,
+      clickable: true
     },
     {
       name: 'Critical Issues',
@@ -48,7 +58,8 @@ export default function StatsOverview({
       icon: AlertCircle,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
-      borderColor: 'border-red-200'
+      borderColor: 'border-red-200',
+      clickable: false
     },
     {
       name: 'Under Maintenance',
@@ -57,7 +68,8 @@ export default function StatsOverview({
       icon: Tool,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      borderColor: 'border-orange-200'
+      borderColor: 'border-orange-200',
+      clickable: false
     },
     {
       name: 'Open Tickets',
@@ -66,7 +78,9 @@ export default function StatsOverview({
       icon: Ticket,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200'
+      borderColor: 'border-purple-200',
+      onClick: onOpenTicketsClick,
+      clickable: true
     }
   ];
 
@@ -77,7 +91,11 @@ export default function StatsOverview({
         return (
           <div
             key={stat.name}
-            className={`bg-white rounded-lg border p-3 sm:p-4 ${stat.borderColor} ${stat.bgColor}`}
+            className={`bg-white rounded-lg border p-3 sm:p-4 ${stat.borderColor} ${stat.bgColor} ${
+              stat.clickable ? 'cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-105' : ''
+            }`}
+            onClick={stat.clickable ? stat.onClick : undefined}
+            title={stat.clickable ? 'Click to view details' : undefined}
           >
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
@@ -92,6 +110,9 @@ export default function StatsOverview({
                     </span>
                   )}
                 </p>
+                {stat.clickable && (
+                  <p className="text-xs text-gray-500 mt-1">Click to view</p>
+                )}
               </div>
               <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${stat.color} flex-shrink-0 ml-2`} />
             </div>

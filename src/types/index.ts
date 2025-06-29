@@ -103,6 +103,21 @@ export interface TroubleTicketActivity {
   };
 }
 
+export interface MaterialUsage {
+  id: string;
+  ticketId: string;
+  materialType: 'fiber-cable' | 'closure' | 'connector' | 'splice-tray' | 'patch-cord' | 'adapter' | 'cleaner' | 'protector' | 'tube' | 'other';
+  materialName: string;
+  quantity: number;
+  unit: 'meter' | 'piece' | 'roll' | 'box' | 'set';
+  unitCost: number;
+  totalCost: number;
+  supplier?: string;
+  partNumber?: string;
+  usedDate: string;
+  notes?: string;
+}
+
 export interface TroubleTicket {
   id: string;
   ticketNumber: string; // NOC-CGK-YYYYMMDD-XXX format
@@ -128,6 +143,24 @@ export interface TroubleTicket {
   activities: TroubleTicketActivity[];
   slaTarget?: number; // SLA target in hours
   slaStatus?: 'within' | 'approaching' | 'breached';
+  
+  // New fields for detailed tracking
+  repairType: 'permanent' | 'temporary';
+  coresSpliced: number;
+  problemCoordinates: {
+    longitude: number;
+    latitude: number;
+  };
+  rootCause: string;
+  trafficImpacted: string;
+  photos: Array<{
+    id: string;
+    url: string;
+    caption: string;
+    uploadedAt: string;
+    uploadedBy: string;
+  }>;
+  materialUsage: MaterialUsage[];
 }
 
 // New Asset Management Types

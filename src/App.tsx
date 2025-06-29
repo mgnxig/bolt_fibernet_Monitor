@@ -4,7 +4,7 @@ import Navigation from './components/Layout/Navigation';
 import Dashboard from './components/Dashboard/Dashboard';
 import RouteManagement from './components/Routes/RouteManagement';
 import AssetManagement from './components/Assets/AssetManagement';
-import TroubleTicketKanban from './components/TroubleTickets/TroubleTicketKanban';
+import TroubleTicketManagement from './components/TroubleTickets/TroubleTicketManagement';
 import { 
   routes as initialRoutes, 
   maintenanceRecords, 
@@ -94,6 +94,10 @@ function App() {
     setNetworkAssets(networkAssets.filter(asset => asset.id !== assetId));
   };
 
+  const handleNavigateToTroubleTickets = () => {
+    setActiveTab('tickets');
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -106,6 +110,7 @@ function App() {
             maintenanceRecords={maintenanceData}
             troubleTickets={troubleTickets}
             onRouteSelect={handleRouteSelect}
+            onNavigateToTroubleTickets={handleNavigateToTroubleTickets}
           />
         );
       case 'routes':
@@ -129,14 +134,11 @@ function App() {
         );
       case 'tickets':
         return (
-          <div className="h-full">
-            <TroubleTicketKanban 
-              tickets={troubleTickets}
-              routes={routes.map(r => ({ id: r.id, name: r.name }))}
-              onCreateTicket={handleCreateTicket}
-              onUpdateTicket={handleUpdateTicket}
-            />
-          </div>
+          <TroubleTicketManagement 
+            tickets={troubleTickets}
+            routes={routes}
+            onUpdateTicket={handleUpdateTicket}
+          />
         );
       case 'history':
         return (

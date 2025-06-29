@@ -13,6 +13,7 @@ interface DashboardProps {
   maintenanceRecords: MaintenanceRecord[];
   troubleTickets: TroubleTicket[];
   onRouteSelect: (route: Route) => void;
+  onNavigateToTroubleTickets?: () => void;
 }
 
 export default function Dashboard({ 
@@ -22,12 +23,19 @@ export default function Dashboard({
   slaTargets, 
   maintenanceRecords,
   troubleTickets,
-  onRouteSelect 
+  onRouteSelect,
+  onNavigateToTroubleTickets
 }: DashboardProps) {
   const operationalRoutes = routes.filter(r => r.status === 'operational').length;
   const criticalRoutes = routes.filter(r => r.status === 'critical').length;
   const maintenanceRoutes = routes.filter(r => r.status === 'maintenance').length;
   const totalTroubleTickets = routes.reduce((sum, route) => sum + route.troubleTickets, 0);
+
+  const handleStatsClick = () => {
+    if (onNavigateToTroubleTickets) {
+      onNavigateToTroubleTickets();
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -47,6 +55,9 @@ export default function Dashboard({
         criticalRoutes={criticalRoutes}
         maintenanceRoutes={maintenanceRoutes}
         totalTroubleTickets={totalTroubleTickets}
+        onClosureUsageClick={handleStatsClick}
+        onCableUsageClick={handleStatsClick}
+        onOpenTicketsClick={handleStatsClick}
       />
 
       {/* Route Status Grid - 3 Cards Per Row */}

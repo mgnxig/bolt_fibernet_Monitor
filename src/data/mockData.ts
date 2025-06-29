@@ -1,4 +1,4 @@
-import { Route, MaintenanceRecord, Alert, SLAData, SLATarget, TroubleTicket, TroubleTicketActivity, Link, NetworkAsset } from '../types';
+import { Route, MaintenanceRecord, Alert, SLAData, SLATarget, TroubleTicket, TroubleTicketActivity, Link, NetworkAsset, MaterialUsage } from '../types';
 
 export const routes: Route[] = [
   {
@@ -609,6 +609,73 @@ export const troubleTickets: TroubleTicket[] = [
     },
     slaTarget: 4,
     slaStatus: 'approaching',
+    repairType: 'permanent',
+    coresSpliced: 12,
+    problemCoordinates: {
+      longitude: 106.8123,
+      latitude: -6.1756
+    },
+    rootCause: 'Water ingress in joint closure due to damaged seal',
+    trafficImpacted: 'Enterprise customers: 15 affected, Residential: 450 customers offline',
+    photos: [
+      {
+        id: 'photo-t001-1',
+        url: 'https://images.pexels.com/photos/159306/fiber-optic-cable-fiber-glass-fiber-159306.jpeg',
+        caption: 'Damaged joint closure with water ingress',
+        uploadedAt: '2024-02-20T11:30:00Z',
+        uploadedBy: 'Sarah Johnson'
+      },
+      {
+        id: 'photo-t001-2',
+        url: 'https://images.pexels.com/photos/442150/pexels-photo-442150.jpeg',
+        caption: 'OTDR test results showing break location',
+        uploadedAt: '2024-02-20T12:00:00Z',
+        uploadedBy: 'Sarah Johnson'
+      }
+    ],
+    materialUsage: [
+      {
+        id: 'mat-001',
+        ticketId: 'ticket-001',
+        materialType: 'closure',
+        materialName: 'Dome Closure 48F IP68',
+        quantity: 1,
+        unit: 'piece',
+        unitCost: 125000,
+        totalCost: 125000,
+        supplier: 'CommScope',
+        partNumber: 'CS-DC-48F-IP68',
+        usedDate: '2024-02-20T14:00:00Z',
+        notes: 'Replacement for water-damaged closure'
+      },
+      {
+        id: 'mat-002',
+        ticketId: 'ticket-001',
+        materialType: 'splice-tray',
+        materialName: 'Splice Tray 12F',
+        quantity: 2,
+        unit: 'piece',
+        unitCost: 45000,
+        totalCost: 90000,
+        supplier: 'Corning',
+        partNumber: 'COR-ST-12F',
+        usedDate: '2024-02-20T14:30:00Z'
+      },
+      {
+        id: 'mat-003',
+        ticketId: 'ticket-001',
+        materialType: 'fiber-cable',
+        materialName: 'Single Mode Fiber G.652D',
+        quantity: 2.5,
+        unit: 'meter',
+        unitCost: 15000,
+        totalCost: 37500,
+        supplier: 'Furukawa',
+        partNumber: 'FUR-SMF-G652D',
+        usedDate: '2024-02-20T15:00:00Z',
+        notes: 'Replacement fiber for damaged section'
+      }
+    ],
     activities: [
       {
         id: 'activity-001',
@@ -692,6 +759,58 @@ export const troubleTickets: TroubleTicket[] = [
     slaTarget: 8,
     slaStatus: 'within',
     totalDuration: 480, // 8 hours
+    repairType: 'permanent',
+    coresSpliced: 0,
+    problemCoordinates: {
+      longitude: 106.8234,
+      latitude: -6.1944
+    },
+    rootCause: 'Scheduled preventive maintenance',
+    trafficImpacted: 'No traffic impact - maintenance window',
+    photos: [
+      {
+        id: 'photo-t002-1',
+        url: 'https://images.pexels.com/photos/442150/pexels-photo-442150.jpeg',
+        caption: 'Before cleaning - connector inspection',
+        uploadedAt: '2024-02-20T09:00:00Z',
+        uploadedBy: 'Mike Wilson'
+      },
+      {
+        id: 'photo-t002-2',
+        url: 'https://images.pexels.com/photos/159306/fiber-optic-cable-fiber-glass-fiber-159306.jpeg',
+        caption: 'After cleaning - all connectors clean',
+        uploadedAt: '2024-02-20T15:30:00Z',
+        uploadedBy: 'Mike Wilson'
+      }
+    ],
+    materialUsage: [
+      {
+        id: 'mat-004',
+        ticketId: 'ticket-002',
+        materialType: 'cleaner',
+        materialName: 'Fiber Optic Cleaning Kit',
+        quantity: 1,
+        unit: 'set',
+        unitCost: 85000,
+        totalCost: 85000,
+        supplier: 'Fluke Networks',
+        partNumber: 'FLU-FCK-001',
+        usedDate: '2024-02-20T09:30:00Z'
+      },
+      {
+        id: 'mat-005',
+        ticketId: 'ticket-002',
+        materialType: 'cleaner',
+        materialName: 'Cleaning Wipes (Box of 100)',
+        quantity: 1,
+        unit: 'box',
+        unitCost: 25000,
+        totalCost: 25000,
+        supplier: 'Thorlabs',
+        partNumber: 'THO-CW-100',
+        usedDate: '2024-02-20T09:30:00Z'
+      }
+    ],
     activities: [
       {
         id: 'activity-006',
@@ -761,6 +880,16 @@ export const troubleTickets: TroubleTicket[] = [
     },
     slaTarget: 6,
     slaStatus: 'within',
+    repairType: 'temporary',
+    coresSpliced: 0,
+    problemCoordinates: {
+      longitude: 106.8567,
+      latitude: -6.2234
+    },
+    rootCause: 'Under investigation - suspected connector degradation',
+    trafficImpacted: 'Reduced bandwidth affecting 25 enterprise customers',
+    photos: [],
+    materialUsage: [],
     activities: [
       {
         id: 'activity-011',
@@ -799,6 +928,59 @@ export const troubleTickets: TroubleTicket[] = [
     slaTarget: 6,
     slaStatus: 'within',
     totalDuration: 1585, // ~26 hours
+    repairType: 'permanent',
+    coresSpliced: 0,
+    problemCoordinates: {
+      longitude: 106.8123,
+      latitude: -6.1756
+    },
+    rootCause: 'Amplifier unit failure due to power surge',
+    trafficImpacted: 'Backup path activated - minimal customer impact',
+    photos: [
+      {
+        id: 'photo-t004-1',
+        url: 'https://images.pexels.com/photos/442150/pexels-photo-442150.jpeg',
+        caption: 'Failed amplifier unit showing error codes',
+        uploadedAt: '2024-02-18T15:00:00Z',
+        uploadedBy: 'Tom Anderson'
+      },
+      {
+        id: 'photo-t004-2',
+        url: 'https://images.pexels.com/photos/159306/fiber-optic-cable-fiber-glass-fiber-159306.jpeg',
+        caption: 'New amplifier unit installed and tested',
+        uploadedAt: '2024-02-19T16:30:00Z',
+        uploadedBy: 'Tom Anderson'
+      }
+    ],
+    materialUsage: [
+      {
+        id: 'mat-006',
+        ticketId: 'ticket-004',
+        materialType: 'other',
+        materialName: 'Optical Amplifier EDFA 20dB',
+        quantity: 1,
+        unit: 'piece',
+        unitCost: 2500000,
+        totalCost: 2500000,
+        supplier: 'Huawei',
+        partNumber: 'HW-EDFA-20DB',
+        usedDate: '2024-02-19T15:00:00Z',
+        notes: 'Replacement for failed unit'
+      },
+      {
+        id: 'mat-007',
+        ticketId: 'ticket-004',
+        materialType: 'patch-cord',
+        materialName: 'SC/APC Patch Cord 2m',
+        quantity: 4,
+        unit: 'piece',
+        unitCost: 35000,
+        totalCost: 140000,
+        supplier: 'Corning',
+        partNumber: 'COR-PC-SC-2M',
+        usedDate: '2024-02-19T15:30:00Z'
+      }
+    ],
     activities: [
       {
         id: 'activity-012',
