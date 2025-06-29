@@ -43,7 +43,7 @@ export default function Dashboard({ routes, alerts, slaData, slaTargets, onRoute
       {/* Route Status Grid */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Route Status</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
           {routes.map((route) => (
             <RouteCard
               key={route.id}
