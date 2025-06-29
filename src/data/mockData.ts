@@ -1,4 +1,4 @@
-import { Route, MaintenanceRecord, Alert, SLAData, SLATarget, TroubleTicket, TroubleTicketActivity, Link } from '../types';
+import { Route, MaintenanceRecord, Alert, SLAData, SLATarget, TroubleTicket, TroubleTicketActivity, Link, NetworkAsset } from '../types';
 
 export const routes: Route[] = [
   {
@@ -217,6 +217,369 @@ export const routes: Route[] = [
         status: 'operational'
       }
     ]
+  }
+];
+
+export const networkAssets: NetworkAsset[] = [
+  {
+    id: 'asset-001',
+    assetNumber: 'HH-CHA-001',
+    name: 'Handhole Central Hub 01',
+    type: 'handhole',
+    routeId: 'route-a',
+    linkId: 'link-a1',
+    location: {
+      longitude: 106.8456,
+      latitude: -6.2088,
+      address: 'Jl. Sudirman No. 123, Jakarta Pusat',
+      landmark: 'Near Plaza Indonesia',
+      elevation: 15
+    },
+    condition: 'good',
+    status: 'active',
+    installationDate: '2023-06-15',
+    lastInspection: '2024-01-15',
+    nextInspection: '2024-04-15',
+    specifications: {
+      manufacturer: 'Corning',
+      model: 'HH-24F',
+      serialNumber: 'SN123456789',
+      capacity: 24,
+      material: 'Concrete',
+      dimensions: {
+        length: 120,
+        width: 80,
+        height: 100,
+        depth: 80
+      },
+      ipRating: 'IP65',
+      operatingTemperature: '-40°C to +70°C'
+    },
+    completeness: {
+      cover: true,
+      lock: true,
+      label: true,
+      grounding: true,
+      drainage: true,
+      accessories: true,
+      documentation: false
+    },
+    photos: [
+      {
+        id: 'photo-001',
+        url: 'https://images.pexels.com/photos/159306/fiber-optic-cable-fiber-glass-fiber-159306.jpeg',
+        caption: 'Handhole installation view',
+        uploadedBy: 'John Smith',
+        uploadedAt: '2024-01-15T10:30:00Z',
+        type: 'installation'
+      },
+      {
+        id: 'photo-002',
+        url: 'https://images.pexels.com/photos/442150/pexels-photo-442150.jpeg',
+        caption: 'Internal fiber connections',
+        uploadedBy: 'John Smith',
+        uploadedAt: '2024-01-15T10:35:00Z',
+        type: 'inspection'
+      }
+    ],
+    maintenanceHistory: [
+      {
+        id: 'maint-001',
+        assetId: 'asset-001',
+        type: 'inspection',
+        date: '2024-01-15',
+        performedBy: 'John Smith',
+        description: 'Quarterly inspection and cleaning',
+        findings: 'All connections secure, minor dust accumulation cleaned',
+        nextMaintenanceDate: '2024-04-15',
+        status: 'completed'
+      }
+    ],
+    notes: 'Located at main intersection, high traffic area. Requires regular monitoring.',
+    createdAt: '2023-06-15T08:00:00Z',
+    updatedAt: '2024-01-15T14:30:00Z',
+    createdBy: 'Installation Team',
+    lastModifiedBy: 'John Smith'
+  },
+  {
+    id: 'asset-002',
+    assetNumber: 'ODC-CHA-001',
+    name: 'ODC Central Hub Alpha',
+    type: 'odc',
+    routeId: 'route-a',
+    location: {
+      longitude: 106.8234,
+      latitude: -6.1944,
+      address: 'Jl. Thamrin No. 45, Jakarta Pusat',
+      landmark: 'Grand Indonesia Mall',
+      elevation: 12
+    },
+    condition: 'excellent',
+    status: 'active',
+    installationDate: '2023-05-20',
+    lastInspection: '2024-02-01',
+    nextInspection: '2024-05-01',
+    specifications: {
+      manufacturer: 'Huawei',
+      model: 'ODC-144F',
+      serialNumber: 'HW987654321',
+      capacity: 144,
+      material: 'Steel',
+      dimensions: {
+        length: 200,
+        width: 150,
+        height: 250
+      },
+      powerRequirement: '220V AC',
+      ipRating: 'IP55',
+      operatingTemperature: '-20°C to +60°C'
+    },
+    completeness: {
+      cover: true,
+      lock: true,
+      label: true,
+      grounding: true,
+      drainage: true,
+      accessories: true,
+      documentation: true
+    },
+    photos: [
+      {
+        id: 'photo-003',
+        url: 'https://images.pexels.com/photos/442150/pexels-photo-442150.jpeg',
+        caption: 'ODC external view',
+        uploadedBy: 'Sarah Johnson',
+        uploadedAt: '2024-02-01T09:00:00Z',
+        type: 'inspection'
+      }
+    ],
+    maintenanceHistory: [
+      {
+        id: 'maint-002',
+        assetId: 'asset-002',
+        type: 'inspection',
+        date: '2024-02-01',
+        performedBy: 'Sarah Johnson',
+        description: 'Monthly inspection and fiber testing',
+        findings: 'All systems operational, excellent condition',
+        nextMaintenanceDate: '2024-05-01',
+        status: 'completed'
+      }
+    ],
+    notes: 'Primary distribution point for Route A. Critical infrastructure.',
+    createdAt: '2023-05-20T10:00:00Z',
+    updatedAt: '2024-02-01T16:00:00Z',
+    createdBy: 'Installation Team',
+    lastModifiedBy: 'Sarah Johnson'
+  },
+  {
+    id: 'asset-003',
+    assetNumber: 'POLE-CHB-015',
+    name: 'Utility Pole CHB-015',
+    type: 'pole',
+    routeId: 'route-b',
+    linkId: 'link-b1',
+    location: {
+      longitude: 106.8567,
+      latitude: -6.2234,
+      address: 'Jl. Gatot Subroto No. 78, Jakarta Selatan',
+      landmark: 'Kuningan City Mall',
+      elevation: 18
+    },
+    condition: 'fair',
+    status: 'active',
+    installationDate: '2023-04-10',
+    lastInspection: '2024-01-20',
+    nextInspection: '2024-03-20',
+    specifications: {
+      manufacturer: 'PT Tiang Listrik',
+      model: 'POLE-12M',
+      serialNumber: 'PL456789123',
+      material: 'Concrete',
+      dimensions: {
+        height: 1200
+      },
+      operatingTemperature: '-30°C to +80°C'
+    },
+    completeness: {
+      cover: false,
+      lock: false,
+      label: true,
+      grounding: true,
+      drainage: false,
+      accessories: true,
+      documentation: true
+    },
+    photos: [
+      {
+        id: 'photo-004',
+        url: 'https://images.pexels.com/photos/442150/pexels-photo-442150.jpeg',
+        caption: 'Pole with fiber cable attachment',
+        uploadedBy: 'Mike Wilson',
+        uploadedAt: '2024-01-20T14:00:00Z',
+        type: 'inspection'
+      }
+    ],
+    maintenanceHistory: [
+      {
+        id: 'maint-003',
+        assetId: 'asset-003',
+        type: 'inspection',
+        date: '2024-01-20',
+        performedBy: 'Mike Wilson',
+        description: 'Visual inspection and cable tension check',
+        findings: 'Cable attachment secure, pole shows minor weathering',
+        nextMaintenanceDate: '2024-03-20',
+        status: 'completed'
+      }
+    ],
+    notes: 'Requires attention for weathering protection. Schedule maintenance soon.',
+    createdAt: '2023-04-10T12:00:00Z',
+    updatedAt: '2024-01-20T18:00:00Z',
+    createdBy: 'Installation Team',
+    lastModifiedBy: 'Mike Wilson'
+  },
+  {
+    id: 'asset-004',
+    assetNumber: 'JC-CHE-008',
+    name: 'Joint Closure CHE-008',
+    type: 'jc',
+    routeId: 'route-e',
+    linkId: 'link-e1',
+    location: {
+      longitude: 106.8123,
+      latitude: -6.1756,
+      address: 'Jl. MH Thamrin No. 1, Jakarta Pusat',
+      landmark: 'Hotel Indonesia Roundabout',
+      elevation: 10
+    },
+    condition: 'critical',
+    status: 'maintenance',
+    installationDate: '2023-03-15',
+    lastInspection: '2024-02-18',
+    nextInspection: '2024-02-25',
+    specifications: {
+      manufacturer: 'CommScope',
+      model: 'JC-48F-IP68',
+      serialNumber: 'CS789123456',
+      capacity: 48,
+      material: 'Polymer',
+      dimensions: {
+        length: 45,
+        width: 15,
+        height: 15
+      },
+      ipRating: 'IP68',
+      operatingTemperature: '-40°C to +70°C'
+    },
+    completeness: {
+      cover: true,
+      lock: true,
+      label: false,
+      grounding: true,
+      drainage: true,
+      accessories: false,
+      documentation: true
+    },
+    photos: [
+      {
+        id: 'photo-005',
+        url: 'https://images.pexels.com/photos/159306/fiber-optic-cable-fiber-glass-fiber-159306.jpeg',
+        caption: 'Joint closure showing damage',
+        uploadedBy: 'Tom Anderson',
+        uploadedAt: '2024-02-18T11:00:00Z',
+        type: 'damage'
+      }
+    ],
+    maintenanceHistory: [
+      {
+        id: 'maint-004',
+        assetId: 'asset-004',
+        type: 'repair',
+        date: '2024-02-18',
+        performedBy: 'Tom Anderson',
+        description: 'Emergency repair due to water ingress',
+        findings: 'Water damage detected, seal replacement required',
+        status: 'pending',
+        cost: 250
+      }
+    ],
+    notes: 'URGENT: Water ingress detected. Requires immediate seal replacement.',
+    createdAt: '2023-03-15T14:00:00Z',
+    updatedAt: '2024-02-18T15:30:00Z',
+    createdBy: 'Installation Team',
+    lastModifiedBy: 'Tom Anderson'
+  },
+  {
+    id: 'asset-005',
+    assetNumber: 'OTB-CHF-003',
+    name: 'OTB Terminal CHF-003',
+    type: 'otb',
+    routeId: 'route-f',
+    linkId: 'link-f1',
+    location: {
+      longitude: 106.8789,
+      latitude: -6.2456,
+      address: 'Jl. Casablanca No. 88, Jakarta Selatan',
+      landmark: 'Kota Kasablanka Mall',
+      elevation: 22
+    },
+    condition: 'good',
+    status: 'active',
+    installationDate: '2023-07-01',
+    lastInspection: '2024-01-25',
+    nextInspection: '2024-04-25',
+    specifications: {
+      manufacturer: 'FiberHome',
+      model: 'OTB-16F',
+      serialNumber: 'FH321654987',
+      capacity: 16,
+      material: 'ABS Plastic',
+      dimensions: {
+        length: 30,
+        width: 20,
+        height: 12
+      },
+      ipRating: 'IP65',
+      operatingTemperature: '-20°C to +60°C'
+    },
+    completeness: {
+      cover: true,
+      lock: true,
+      label: true,
+      grounding: false,
+      drainage: false,
+      accessories: true,
+      documentation: true
+    },
+    photos: [
+      {
+        id: 'photo-006',
+        url: 'https://images.pexels.com/photos/442150/pexels-photo-442150.jpeg',
+        caption: 'OTB installation complete',
+        uploadedBy: 'Lisa Chen',
+        uploadedAt: '2024-01-25T13:00:00Z',
+        type: 'maintenance'
+      }
+    ],
+    maintenanceHistory: [
+      {
+        id: 'maint-005',
+        assetId: 'asset-005',
+        type: 'cleaning',
+        date: '2024-01-25',
+        performedBy: 'Lisa Chen',
+        description: 'Routine cleaning and connector inspection',
+        findings: 'All connections clean and secure',
+        nextMaintenanceDate: '2024-04-25',
+        status: 'completed'
+      }
+    ],
+    notes: 'Customer terminal box serving residential area. Good performance.',
+    createdAt: '2023-07-01T09:00:00Z',
+    updatedAt: '2024-01-25T17:00:00Z',
+    createdBy: 'Installation Team',
+    lastModifiedBy: 'Lisa Chen'
   }
 ];
 

@@ -129,3 +129,81 @@ export interface TroubleTicket {
   slaTarget?: number; // SLA target in hours
   slaStatus?: 'within' | 'approaching' | 'breached';
 }
+
+// New Asset Management Types
+export interface AssetLocation {
+  longitude: number;
+  latitude: number;
+  address: string;
+  landmark?: string;
+  elevation?: number; // in meters
+}
+
+export interface AssetPhoto {
+  id: string;
+  url: string;
+  caption: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  type: 'installation' | 'maintenance' | 'inspection' | 'damage' | 'repair';
+}
+
+export interface AssetMaintenance {
+  id: string;
+  assetId: string;
+  type: 'inspection' | 'cleaning' | 'repair' | 'replacement' | 'upgrade';
+  date: string;
+  performedBy: string;
+  description: string;
+  findings?: string;
+  nextMaintenanceDate?: string;
+  cost?: number;
+  status: 'completed' | 'pending' | 'scheduled';
+}
+
+export interface NetworkAsset {
+  id: string;
+  assetNumber: string; // Unique asset identifier
+  name: string;
+  type: 'handhole' | 'odc' | 'pole' | 'jc' | 'otb' | 'splice-box' | 'repeater' | 'terminal' | 'cabinet';
+  routeId: string;
+  linkId?: string;
+  location: AssetLocation;
+  condition: 'excellent' | 'good' | 'fair' | 'poor' | 'critical';
+  status: 'active' | 'inactive' | 'maintenance' | 'decommissioned';
+  installationDate: string;
+  lastInspection?: string;
+  nextInspection?: string;
+  specifications: {
+    manufacturer?: string;
+    model?: string;
+    serialNumber?: string;
+    capacity?: number;
+    material?: string;
+    dimensions?: {
+      length?: number;
+      width?: number;
+      height?: number;
+      depth?: number;
+    };
+    powerRequirement?: string;
+    operatingTemperature?: string;
+    ipRating?: string;
+  };
+  completeness: {
+    cover: boolean;
+    lock: boolean;
+    label: boolean;
+    grounding: boolean;
+    drainage: boolean;
+    accessories: boolean;
+    documentation: boolean;
+  };
+  photos: AssetPhoto[];
+  maintenanceHistory: AssetMaintenance[];
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  lastModifiedBy: string;
+}
