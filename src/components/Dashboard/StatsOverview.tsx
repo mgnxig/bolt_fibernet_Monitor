@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, AlertCircle, PenTool as Tool, Ticket } from 'lucide-react';
+import { CheckCircle, AlertCircle, PenTool as Tool, Ticket, Package, Cable } from 'lucide-react';
 
 interface StatsOverviewProps {
   totalRoutes: number;
@@ -16,15 +16,30 @@ export default function StatsOverview({
   maintenanceRoutes,
   totalTroubleTickets
 }: StatsOverviewProps) {
+  // Mock data for closure and cable usage
+  const totalClosuresUsed = 245; // Total closures used for trouble tickets
+  const totalCableUsed = 1850; // Total cable length in meters used for trouble tickets
+
   const stats = [
     {
-      name: 'Operational Routes',
-      value: operationalRoutes,
-      total: totalRoutes,
-      icon: CheckCircle,
+      name: 'Closure Usage',
+      value: totalClosuresUsed,
+      suffix: ' units',
+      icon: Package,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-200',
+      description: 'Total closures used for trouble tickets'
+    },
+    {
+      name: 'Cable Usage',
+      value: totalCableUsed,
+      suffix: ' m',
+      icon: Cable,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
-      borderColor: 'border-green-200'
+      borderColor: 'border-green-200',
+      description: 'Total cable length used for trouble tickets'
     },
     {
       name: 'Critical Issues',
@@ -40,9 +55,9 @@ export default function StatsOverview({
       value: maintenanceRoutes,
       total: totalRoutes,
       icon: Tool,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200'
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+      borderColor: 'border-orange-200'
     },
     {
       name: 'Open Tickets',
@@ -56,27 +71,29 @@ export default function StatsOverview({
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (
           <div
             key={stat.name}
-            className={`bg-white rounded-xl border p-6 ${stat.borderColor} ${stat.bgColor}`}
+            className={`bg-white rounded-lg border p-3 sm:p-4 ${stat.borderColor} ${stat.bgColor}`}
           >
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                <p className={`text-2xl font-bold ${stat.color}`}>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate" title={stat.description || stat.name}>
+                  {stat.name}
+                </p>
+                <p className={`text-lg sm:text-xl font-bold ${stat.color} truncate`}>
                   {stat.value}{stat.suffix || ''}
                   {stat.total && (
-                    <span className="text-lg font-medium text-gray-400">
+                    <span className="text-sm sm:text-base font-medium text-gray-400">
                       /{stat.total}
                     </span>
                   )}
                 </p>
               </div>
-              <Icon className={`h-8 w-8 ${stat.color}`} />
+              <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${stat.color} flex-shrink-0 ml-2`} />
             </div>
           </div>
         );

@@ -1,18 +1,29 @@
 import React from 'react';
-import { Route, Alert, SLAData, SLATarget } from '../../types';
+import { Route, Alert, SLAData, SLATarget, MaintenanceRecord, TroubleTicket } from '../../types';
 import RouteCard from './RouteCard';
 import StatsOverview from './StatsOverview';
 import SLAChart from './SLAChart';
+import MaintenanceTimeline from './MaintenanceTimeline';
 
 interface DashboardProps {
   routes: Route[];
   alerts: Alert[];
   slaData: SLAData[];
   slaTargets: SLATarget[];
+  maintenanceRecords: MaintenanceRecord[];
+  troubleTickets: TroubleTicket[];
   onRouteSelect: (route: Route) => void;
 }
 
-export default function Dashboard({ routes, alerts, slaData, slaTargets, onRouteSelect }: DashboardProps) {
+export default function Dashboard({ 
+  routes, 
+  alerts, 
+  slaData, 
+  slaTargets, 
+  maintenanceRecords,
+  troubleTickets,
+  onRouteSelect 
+}: DashboardProps) {
   const operationalRoutes = routes.filter(r => r.status === 'operational').length;
   const criticalRoutes = routes.filter(r => r.status === 'critical').length;
   const maintenanceRoutes = routes.filter(r => r.status === 'maintenance').length;
@@ -37,6 +48,15 @@ export default function Dashboard({ routes, alerts, slaData, slaTargets, onRoute
         maintenanceRoutes={maintenanceRoutes}
         totalTroubleTickets={totalTroubleTickets}
       />
+
+      {/* Activity Timeline */}
+      <div className="mb-6 sm:mb-8">
+        <MaintenanceTimeline 
+          maintenanceRecords={maintenanceRecords}
+          troubleTickets={troubleTickets}
+          routes={routes.map(r => ({ id: r.id, name: r.name }))}
+        />
+      </div>
 
       {/* Route Status Grid - 3 Cards Per Row */}
       <div className="mb-6 sm:mb-8">

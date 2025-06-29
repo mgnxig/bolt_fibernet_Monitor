@@ -105,6 +105,8 @@ function App() {
             alerts={alerts}
             slaData={slaWeeklyData}
             slaTargets={slaTargets}
+            maintenanceRecords={maintenanceData}
+            troubleTickets={troubleTickets}
             onRouteSelect={handleRouteSelect}
           />
         );
