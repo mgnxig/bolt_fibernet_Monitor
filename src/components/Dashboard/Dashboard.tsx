@@ -40,10 +40,10 @@ export default function Dashboard({ routes, alerts, slaData, slaTargets, onRoute
         totalTroubleTickets={totalTroubleTickets}
       />
 
-      {/* Route Status Grid - Mobile First Responsive */}
+      {/* Route Status Grid - 2 Cards Per Row */}
       <div className="mb-6 sm:mb-8">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Route Status</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {routes.map((route) => (
             <RouteCard
               key={route.id}
