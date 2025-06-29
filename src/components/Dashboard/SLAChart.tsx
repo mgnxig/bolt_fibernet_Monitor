@@ -14,13 +14,15 @@ export default function SLAChart({ data }: SLAChartProps) {
   const barSpacing = 7; // Increased from 6 to 7 (120%)
 
   const routes = ['routeA', 'routeB', 'routeC', 'routeD', 'routeE', 'routeF'] as const;
+  
+  // Route colors matching the card colors
   const routeColors = {
-    routeA: '#10B981',
-    routeB: '#F59E0B',
-    routeC: '#EF4444',
-    routeD: '#3B82F6',
-    routeE: '#8B5CF6',
-    routeF: '#06B6D4'
+    routeA: '#10B981', // Green - operational
+    routeB: '#F59E0B', // Yellow - warning  
+    routeC: '#3B82F6', // Blue - maintenance
+    routeD: '#10B981', // Green - operational
+    routeE: '#EF4444', // Red - critical
+    routeF: '#10B981'  // Green - operational
   };
 
   const routeNames = {
@@ -177,10 +179,8 @@ export default function SLAChart({ data }: SLAChartProps) {
                   const barHeight = getBarHeight(weekData[routeKey]);
                   const barY = getYPosition(weekData[routeKey]);
                   
-                  // Color based on performance vs 6-hour target
-                  const hours = weekData[routeKey];
-                  const barColor = hours <= 6 ? routeColors[routeKey] : 
-                                  hours <= 12 ? '#F59E0B' : '#EF4444';
+                  // Use consistent route colors
+                  const barColor = routeColors[routeKey];
                   
                   return (
                     <g key={routeKey}>
@@ -230,52 +230,6 @@ export default function SLAChart({ data }: SLAChartProps) {
         </svg>
       </div>
 
-      {/* Legend */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-6 pt-4 border-t border-gray-200">
-        {routes.map((routeKey) => {
-          const current = latestData[routeKey];
-          const previous = previousData[routeKey];
-          const trend = getTrend(current, previous);
-          const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
-          const changeValue = (current - previous).toFixed(1);
-          
-          return (
-            <div key={routeKey} className="flex items-center space-x-2">
-              <div
-                className="w-4 h-4 rounded"
-                style={{ backgroundColor: current <= 6 ? routeColors[routeKey] : 
-                                        current <= 12 ? '#F59E0B' : '#EF4444' }}
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {routeNames[routeKey]}
-                </p>
-                <div className="flex items-center space-x-1">
-                  <span className={`text-xs font-medium ${
-                    current <= 6 ? 'text-green-600' : 
-                    current <= 12 ? 'text-yellow-600' : 'text-red-600'
-                  }`}>
-                    {current.toFixed(1)}h
-                  </span>
-                  <TrendIcon 
-                    className={`h-3 w-3 ${
-                      trend === 'up' ? 'text-green-500' : 
-                      trend === 'down' ? 'text-red-500' : 'text-gray-400'
-                    }`} 
-                  />
-                  <span className={`text-xs ${
-                    trend === 'up' ? 'text-green-500' : 
-                    trend === 'down' ? 'text-red-500' : 'text-gray-400'
-                  }`}>
-                    {trend === 'down' ? '+' : trend === 'up' ? '-' : ''}{Math.abs(parseFloat(changeValue))}h
-                  </span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
       {/* Performance indicators */}
       <div className="mt-4 flex items-center justify-center space-x-6 text-xs">
         <div className="flex items-center space-x-2">
@@ -288,7 +242,7 @@ export default function SLAChart({ data }: SLAChartProps) {
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-red-500 rounded"></div>
-          <span className="text-gray-600">&gt; 12h (Needs Improvement)</span>
+          <span className="text-gray-600">> 12h (Needs Improvement)</span>
         </div>
       </div>
     </div>

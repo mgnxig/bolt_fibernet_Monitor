@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route } from '../../types';
-import { MapPin, Calendar, Zap, Signal, AlertCircle, TrendingUp, BarChart3, Building2, Boxes, Link as JCIcon } from 'lucide-react';
+import { MapPin, Calendar, Signal, AlertCircle, TrendingUp } from 'lucide-react';
 
 interface RouteCardProps {
   route: Route;
@@ -65,15 +65,14 @@ export default function RouteCard({ route, onClick }: RouteCardProps) {
   const ticketsLastWeek = route.troubleTickets - ticketsThisWeek;
   
   // Mock Average SLA in hours (based on route status)
-  const averageSLAHours = route.status === 'operational' ? 2.1 :
-                         route.status === 'warning' ? 4.8 :
+  const averageSLAHours = route.status === 'operational' ? 4.2 :
+                         route.status === 'warning' ? 6.8 :
                          route.status === 'maintenance' ? 8.5 :
-                         15.2; // critical
+                         12.2; // critical
 
   const getSLAColor = (hours: number) => {
-    if (hours <= 4) return 'text-green-600';
-    if (hours <= 8) return 'text-yellow-600';
-    if (hours <= 12) return 'text-orange-600';
+    if (hours < 6) return 'text-blue-600';
+    if (hours >= 6 && hours <= 7) return 'text-green-600';
     return 'text-red-600';
   };
 
@@ -112,53 +111,22 @@ export default function RouteCard({ route, onClick }: RouteCardProps) {
         </div>
       </div>
 
-      {/* Links Detail - Compact */}
+      {/* Assets Detail - Text Based */}
       <div className="mb-3">
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-xs font-medium text-gray-500">Links</h4>
-          <span className="text-xs text-gray-400">({route.links.length})</span>
-        </div>
-        <div className="space-y-1">
-          {route.links.slice(0, 1).map((link) => (
-            <div key={link.id} className="flex items-center justify-between text-xs bg-blue-50 rounded p-2">
-              <span className="font-medium text-blue-700 truncate flex-1 mr-2">{link.name}</span>
-              <div className="flex items-center space-x-2 flex-shrink-0">
-                <span className="text-blue-600">{link.length}km</span>
-                <span className={`font-medium ${getLossColor(link.totalLoss)}`}>
-                  {link.totalLoss}dB
-                </span>
-              </div>
-            </div>
-          ))}
-          {route.links.length > 1 && (
-            <div className="text-xs text-gray-500 text-center bg-gray-50 rounded p-1">
-              +{route.links.length - 1} more links
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Assets Detail - Compact Grid */}
-      <div className="mb-3">
-        <h4 className="text-xs font-medium text-gray-500 mb-2">Assets</h4>
         <div className="grid grid-cols-4 gap-1">
           <div className="text-center p-1.5 bg-blue-50 rounded">
-            <Building2 className="h-4 w-4 text-blue-600 mx-auto mb-1" />
             <p className="text-xs font-bold text-blue-700">{route.assets.handhole}</p>
             <p className="text-xs text-blue-600">HH</p>
           </div>
           <div className="text-center p-1.5 bg-green-50 rounded">
-            <Boxes className="h-4 w-4 text-green-600 mx-auto mb-1" />
             <p className="text-xs font-bold text-green-700">{route.assets.odc}</p>
             <p className="text-xs text-green-600">ODC</p>
           </div>
           <div className="text-center p-1.5 bg-orange-50 rounded">
-            <Zap className="h-4 w-4 text-orange-600 mx-auto mb-1" />
             <p className="text-xs font-bold text-orange-700">{route.assets.pole}</p>
             <p className="text-xs text-orange-600">Pole</p>
           </div>
           <div className="text-center p-1.5 bg-purple-50 rounded">
-            <JCIcon className="h-4 w-4 text-purple-600 mx-auto mb-1" />
             <p className="text-xs font-bold text-purple-700">{route.assets.jc}</p>
             <p className="text-xs text-purple-600">JC</p>
           </div>
@@ -180,10 +148,10 @@ export default function RouteCard({ route, onClick }: RouteCardProps) {
           </p>
         </div>
 
-        <div className="text-center p-2 bg-green-50 rounded">
+        <div className="text-center p-2 bg-gray-50 rounded">
           <div className="flex items-center justify-center space-x-1 mb-1">
             <TrendingUp className={`h-4 w-4 ${getSLAColor(averageSLAHours)}`} />
-            <p className="text-xs text-green-600 font-medium">Avg SLA</p>
+            <p className="text-xs text-gray-600 font-medium">Avg SLA</p>
           </div>
           <p className={`text-sm font-bold ${getSLAColor(averageSLAHours)}`}>
             {averageSLAHours.toFixed(1)}h
@@ -195,7 +163,7 @@ export default function RouteCard({ route, onClick }: RouteCardProps) {
       </div>
 
       {/* Metrics Row 2: Trouble Tickets */}
-      <div className="grid grid-cols-2 gap-2 mb-3">
+      <div className="grid grid-cols-2 gap-2">
         <div className="text-center p-2 bg-blue-50 rounded">
           <div className="flex items-center justify-center space-x-1 mb-1">
             <AlertCircle className="h-4 w-4 text-blue-600" />
@@ -216,22 +184,6 @@ export default function RouteCard({ route, onClick }: RouteCardProps) {
           <p className={`text-xs ${getTroubleTicketColor(ticketsThisWeek)}`}>
             Tickets
           </p>
-        </div>
-      </div>
-
-      {/* Next Maintenance - Compact */}
-      <div className="border-t border-gray-100 pt-2">
-        <div className="flex items-center justify-center">
-          <div className="flex items-center space-x-1">
-            <Calendar className="h-3 w-3 text-gray-400" />
-            <span className="text-xs text-gray-500 font-medium">Next Maintenance:</span>
-            <span className="text-xs text-gray-700 font-semibold">
-              {new Date(route.nextMaintenance).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
-              })}
-            </span>
-          </div>
         </div>
       </div>
     </div>
