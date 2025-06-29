@@ -15,14 +15,14 @@ export default function SLAChart({ data }: SLAChartProps) {
 
   const routes = ['routeA', 'routeB', 'routeC', 'routeD', 'routeE', 'routeF'] as const;
   
-  // Route colors matching the card colors
+  // Different colors for each route
   const routeColors = {
-    routeA: '#10B981', // Green - operational
-    routeB: '#F59E0B', // Yellow - warning  
-    routeC: '#3B82F6', // Blue - maintenance
-    routeD: '#10B981', // Green - operational
-    routeE: '#EF4444', // Red - critical
-    routeF: '#10B981'  // Green - operational
+    routeA: '#10B981', // Green
+    routeB: '#F59E0B', // Orange
+    routeC: '#3B82F6', // Blue
+    routeD: '#8B5CF6', // Purple
+    routeE: '#EF4444', // Red
+    routeF: '#06B6D4'  // Cyan
   };
 
   const routeNames = {

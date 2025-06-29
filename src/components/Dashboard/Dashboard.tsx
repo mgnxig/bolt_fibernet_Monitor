@@ -3,7 +3,6 @@ import { Route, Alert, SLAData, SLATarget } from '../../types';
 import RouteCard from './RouteCard';
 import StatsOverview from './StatsOverview';
 import SLAChart from './SLAChart';
-import SLAKanban from './SLAKanban';
 
 interface DashboardProps {
   routes: Route[];
@@ -29,7 +28,6 @@ export default function Dashboard({ routes, alerts, slaData, slaTargets, onRoute
       {/* SLA Monitoring Section */}
       <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
         <SLAChart data={slaData} />
-        <SLAKanban targets={slaTargets} />
       </div>
 
       <StatsOverview
