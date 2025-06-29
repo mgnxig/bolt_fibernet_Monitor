@@ -242,7 +242,7 @@ export default function SLAChart({ data }: SLAChartProps) {
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-red-500 rounded"></div>
-          <span className="text-gray-600">> 12h (Needs Improvement)</span>
+          <span className="text-gray-600">{'>'} 12h (Needs Improvement)</span>
         </div>
       </div>
     </div>
