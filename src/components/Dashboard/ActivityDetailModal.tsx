@@ -56,6 +56,7 @@ export default function ActivityDetailModal({
     notes: activity?.notes || ''
   });
   const [newEquipment, setNewEquipment] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -105,13 +106,27 @@ export default function ActivityDetailModal({
     }
   };
 
+  const validateForm = () => {
+    return formData.title.trim() !== '' && 
+           formData.description.trim() !== '' && 
+           formData.routeId !== '' && 
+           formData.technician.trim() !== '' &&
+           formData.duration > 0;
+  };
+
   const handleSave = () => {
+    if (!validateForm()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
     if (isCreate) {
       onCreate(formData);
+      onClose();
     } else if (activity) {
       onUpdate(activity.id, formData);
+      setIsEditing(false);
     }
-    setIsEditing(false);
   };
 
   const handleCancel = () => {
@@ -139,7 +154,7 @@ export default function ActivityDetailModal({
   };
 
   const handleDelete = () => {
-    if (activity && window.confirm('Are you sure you want to delete this activity?')) {
+    if (activity) {
       onDelete(activity.id);
       onClose();
     }
@@ -201,7 +216,7 @@ export default function ActivityDetailModal({
                   <span>Edit</span>
                 </button>
                 <button
-                  onClick={handleDelete}
+                  onClick={() => setShowDeleteConfirm(true)}
                   className="flex items-center space-x-1 px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -225,12 +240,15 @@ export default function ActivityDetailModal({
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Activity Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Activity Type <span className="text-red-500">*</span>
+                </label>
                 {isEditing ? (
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
                   >
                     <option value="maintenance">Maintenance</option>
                     <option value="patrol">Patrol</option>
@@ -245,12 +263,15 @@ export default function ActivityDetailModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status <span className="text-red-500">*</span>
+                </label>
                 {isEditing ? (
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
                   >
                     <option value="scheduled">Scheduled</option>
                     <option value="in-progress">In Progress</option>
@@ -286,7 +307,9 @@ export default function ActivityDetailModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Route</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Route <span className="text-red-500">*</span>
+                </label>
                 {isEditing ? (
                   <select
                     value={formData.routeId}
@@ -308,7 +331,9 @@ export default function ActivityDetailModal({
             </div>
 
             <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Title <span className="text-red-500">*</span>
+              </label>
               {isEditing ? (
                 <input
                   type="text"
@@ -324,7 +349,9 @@ export default function ActivityDetailModal({
             </div>
 
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description <span className="text-red-500">*</span>
+              </label>
               {isEditing ? (
                 <textarea
                   value={formData.description}
@@ -346,7 +373,9 @@ export default function ActivityDetailModal({
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date & Time</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date & Time <span className="text-red-500">*</span>
+                </label>
                 {isEditing ? (
                   <input
                     type="datetime-local"
@@ -364,7 +393,9 @@ export default function ActivityDetailModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Duration (hours)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Duration (hours) <span className="text-red-500">*</span>
+                </label>
                 {isEditing ? (
                   <input
                     type="number"
@@ -384,7 +415,9 @@ export default function ActivityDetailModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Technician</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Technician <span className="text-red-500">*</span>
+                </label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -510,7 +543,12 @@ export default function ActivityDetailModal({
               <button
                 type="button"
                 onClick={handleSave}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                disabled={!validateForm()}
+                className={`px-6 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                  validateForm() 
+                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
               >
                 <Save className="h-4 w-4" />
                 <span>{isCreate ? 'Create Activity' : 'Save Changes'}</span>
@@ -518,6 +556,37 @@ export default function ActivityDetailModal({
             </div>
           )}
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Delete Activity</h3>
+              </div>
+              
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete this activity? This action cannot be undone.
+              </p>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete Activity
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
