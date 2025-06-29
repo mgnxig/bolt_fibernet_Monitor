@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart3, Calendar, History, AlertTriangle, MapPin, Ticket, Building2 } from 'lucide-react';
+import { BarChart3, History, AlertTriangle, MapPin, Ticket, Building2 } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -12,7 +12,6 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
     { id: 'routes', label: 'Route Management', icon: MapPin },
     { id: 'assets', label: 'Asset Management', icon: Building2 },
     { id: 'tickets', label: 'Trouble Tickets', icon: Ticket },
-    { id: 'maintenance', label: 'Maintenance', icon: Calendar },
     { id: 'history', label: 'History', icon: History },
     { id: 'alerts', label: 'Alerts', icon: AlertTriangle },
   ];

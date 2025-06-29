@@ -4,8 +4,6 @@ import Navigation from './components/Layout/Navigation';
 import Dashboard from './components/Dashboard/Dashboard';
 import RouteManagement from './components/Routes/RouteManagement';
 import AssetManagement from './components/Assets/AssetManagement';
-import MaintenanceScheduler from './components/Maintenance/MaintenanceScheduler';
-import MaintenanceList from './components/Maintenance/MaintenanceList';
 import TroubleTicketKanban from './components/TroubleTickets/TroubleTicketKanban';
 import { 
   routes as initialRoutes, 
@@ -140,32 +138,13 @@ function App() {
             />
           </div>
         );
-      case 'maintenance':
-        return (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Maintenance Management</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <MaintenanceScheduler
-                routes={routes.map(r => ({ id: r.id, name: r.name }))}
-                onSchedule={handleScheduleMaintenance}
-              />
-              <div>
-                <MaintenanceList
-                  maintenanceRecords={maintenanceData.slice(0, 5)}
-                  routes={routes.map(r => ({ id: r.id, name: r.name }))}
-                />
-              </div>
-            </div>
-          </div>
-        );
       case 'history':
         return (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Maintenance History</h2>
-            <MaintenanceList
-              maintenanceRecords={maintenanceData}
-              routes={routes.map(r => ({ id: r.id, name: r.name }))}
-            />
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Activity History</h2>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <p className="text-gray-500 text-center">Activity history will be displayed here</p>
+            </div>
           </div>
         );
       case 'alerts':

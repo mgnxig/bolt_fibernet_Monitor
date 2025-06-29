@@ -49,15 +49,6 @@ export default function Dashboard({
         totalTroubleTickets={totalTroubleTickets}
       />
 
-      {/* Activity Timeline */}
-      <div className="mb-6 sm:mb-8">
-        <MaintenanceTimeline 
-          maintenanceRecords={maintenanceRecords}
-          troubleTickets={troubleTickets}
-          routes={routes.map(r => ({ id: r.id, name: r.name }))}
-        />
-      </div>
-
       {/* Route Status Grid - 3 Cards Per Row */}
       <div className="mb-6 sm:mb-8">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Route Status</h3>
@@ -70,6 +61,15 @@ export default function Dashboard({
             />
           ))}
         </div>
+      </div>
+
+      {/* Activity Timeline - Moved to Bottom */}
+      <div className="mb-6 sm:mb-8">
+        <MaintenanceTimeline 
+          maintenanceRecords={maintenanceRecords}
+          troubleTickets={troubleTickets}
+          routes={routes.map(r => ({ id: r.id, name: r.name }))}
+        />
       </div>
     </div>
   );

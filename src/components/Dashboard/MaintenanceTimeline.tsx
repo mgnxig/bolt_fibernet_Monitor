@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MaintenanceRecord, TroubleTicket } from '../../types';
 import { 
   Calendar, Clock, User, Wrench, AlertTriangle, 
   CheckCircle, PlayCircle, XCircle, MapPin,
-  Activity, Settings, Car, Shield
+  Activity, Settings, Car, Shield, Eye, Plus
 } from 'lucide-react';
+import ActivityDetailModal from './ActivityDetailModal';
 
 interface MaintenanceTimelineProps {
   maintenanceRecords: MaintenanceRecord[];
@@ -12,11 +13,31 @@ interface MaintenanceTimelineProps {
   routes: Array<{ id: string; name: string }>;
 }
 
+interface TimelineActivity {
+  id: string;
+  type: 'maintenance' | 'patrol' | 'trouble';
+  title: string;
+  description: string;
+  status: 'completed' | 'in-progress' | 'scheduled' | 'cancelled';
+  date: Date;
+  routeId: string;
+  technician: string;
+  duration: number;
+  priority?: 'low' | 'medium' | 'high' | 'critical';
+  location?: string;
+  equipment?: string[];
+  notes?: string;
+}
+
 export default function MaintenanceTimeline({ 
   maintenanceRecords, 
   troubleTickets, 
   routes 
 }: MaintenanceTimelineProps) {
+  const [selectedActivity, setSelectedActivity] = useState<TimelineActivity | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [activities, setActivities] = useState<TimelineActivity[]>([]);
+
   // Get current date and calculate week ranges
   const today = new Date();
   const currentWeekStart = new Date(today);
@@ -63,21 +84,6 @@ export default function MaintenanceTimeline({
     }
   };
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'prepare':
-        return Settings;
-      case 'travel':
-        return Car;
-      case 'handling':
-        return Wrench;
-      case 'securing':
-        return Shield;
-      default:
-        return Activity;
-    }
-  };
-
   // Mock timeline data for demonstration
   const timelineData = [
     // Last Week
@@ -87,36 +93,48 @@ export default function MaintenanceTimeline({
       items: [
         {
           id: 'timeline-1',
-          type: 'maintenance',
+          type: 'maintenance' as const,
           title: 'Preventive Maintenance Route A',
           description: 'Quarterly fiber inspection and cleaning',
-          status: 'completed',
-          date: new Date(lastWeekStart.getTime() + 2 * 24 * 60 * 60 * 1000), // Tuesday
+          status: 'completed' as const,
+          date: new Date(lastWeekStart.getTime() + 2 * 24 * 60 * 60 * 1000),
           routeId: 'route-a',
           technician: 'John Smith',
-          duration: 4
+          duration: 4,
+          priority: 'medium' as const,
+          location: 'Central Hub - Equipment Room',
+          equipment: ['OTDR', 'Cleaning Kit', 'Connector Tester'],
+          notes: 'All connections tested and cleaned successfully'
         },
         {
           id: 'timeline-2',
-          type: 'patrol',
+          type: 'patrol' as const,
           title: 'Route Patrol - District B',
           description: 'Visual inspection of overhead cables',
-          status: 'completed',
-          date: new Date(lastWeekStart.getTime() + 4 * 24 * 60 * 60 * 1000), // Thursday
+          status: 'completed' as const,
+          date: new Date(lastWeekStart.getTime() + 4 * 24 * 60 * 60 * 1000),
           routeId: 'route-b',
           technician: 'Sarah Johnson',
-          duration: 6
+          duration: 6,
+          priority: 'low' as const,
+          location: 'Jl. Gatot Subroto corridor',
+          equipment: ['Binoculars', 'Camera', 'Measurement Tools'],
+          notes: 'Minor cable sag detected at pole 15, scheduled for adjustment'
         },
         {
           id: 'timeline-3',
-          type: 'trouble',
+          type: 'trouble' as const,
           title: 'Signal Loss Investigation',
           description: 'Emergency repair on Route E',
-          status: 'completed',
-          date: new Date(lastWeekStart.getTime() + 5 * 24 * 60 * 60 * 1000), // Friday
+          status: 'completed' as const,
+          date: new Date(lastWeekStart.getTime() + 5 * 24 * 60 * 60 * 1000),
           routeId: 'route-e',
           technician: 'Mike Wilson',
-          duration: 8
+          duration: 8,
+          priority: 'critical' as const,
+          location: 'Joint Closure CHE-008',
+          equipment: ['Fusion Splicer', 'OTDR', 'Spare Fiber'],
+          notes: 'Water ingress repaired, seal replaced, service restored'
         }
       ]
     },
@@ -127,25 +145,33 @@ export default function MaintenanceTimeline({
       items: [
         {
           id: 'timeline-4',
-          type: 'maintenance',
+          type: 'maintenance' as const,
           title: 'Connector Cleaning Route C',
           description: 'Scheduled connector maintenance',
-          status: 'in-progress',
-          date: new Date(currentWeekStart.getTime() + 1 * 24 * 60 * 60 * 1000), // Monday
+          status: 'in-progress' as const,
+          date: new Date(currentWeekStart.getTime() + 1 * 24 * 60 * 60 * 1000),
           routeId: 'route-c',
           technician: 'Tom Anderson',
-          duration: 5
+          duration: 5,
+          priority: 'medium' as const,
+          location: 'ODC Central Hub Charlie',
+          equipment: ['Cleaning Kit', 'Inspection Scope'],
+          notes: 'Progress: 60% complete, connectors 1-12 cleaned'
         },
         {
           id: 'timeline-5',
-          type: 'patrol',
+          type: 'patrol' as const,
           title: 'Weekly Patrol Route F',
           description: 'Regular infrastructure inspection',
-          status: 'scheduled',
-          date: new Date(currentWeekStart.getTime() + 3 * 24 * 60 * 60 * 1000), // Wednesday
+          status: 'scheduled' as const,
+          date: new Date(currentWeekStart.getTime() + 3 * 24 * 60 * 60 * 1000),
           routeId: 'route-f',
           technician: 'Lisa Chen',
-          duration: 4
+          duration: 4,
+          priority: 'low' as const,
+          location: 'Jl. Casablanca corridor',
+          equipment: ['Camera', 'GPS Device', 'Checklist'],
+          notes: 'Scheduled weekly infrastructure inspection'
         }
       ]
     },
@@ -156,25 +182,33 @@ export default function MaintenanceTimeline({
       items: [
         {
           id: 'timeline-6',
-          type: 'maintenance',
+          type: 'maintenance' as const,
           title: 'Quarterly Inspection Route D',
           description: 'Comprehensive route inspection',
-          status: 'scheduled',
-          date: new Date(nextWeekStart.getTime() + 2 * 24 * 60 * 60 * 1000), // Tuesday
+          status: 'scheduled' as const,
+          date: new Date(nextWeekStart.getTime() + 2 * 24 * 60 * 60 * 1000),
           routeId: 'route-d',
           technician: 'John Smith',
-          duration: 6
+          duration: 6,
+          priority: 'medium' as const,
+          location: 'Full Route D inspection',
+          equipment: ['OTDR', 'Power Meter', 'Visual Fault Locator'],
+          notes: 'Quarterly comprehensive inspection scheduled'
         },
         {
           id: 'timeline-7',
-          type: 'patrol',
+          type: 'patrol' as const,
           title: 'Infrastructure Audit Route B',
           description: 'Monthly infrastructure audit',
-          status: 'scheduled',
-          date: new Date(nextWeekStart.getTime() + 4 * 24 * 60 * 60 * 1000), // Thursday
+          status: 'scheduled' as const,
+          date: new Date(nextWeekStart.getTime() + 4 * 24 * 60 * 60 * 1000),
           routeId: 'route-b',
           technician: 'Sarah Johnson',
-          duration: 8
+          duration: 8,
+          priority: 'high' as const,
+          location: 'Route B full corridor',
+          equipment: ['Audit Checklist', 'Camera', 'Measurement Tools'],
+          notes: 'Monthly infrastructure audit and documentation'
         }
       ]
     }
@@ -206,119 +240,241 @@ export default function MaintenanceTimeline({
     }
   };
 
+  const handleCreateActivity = (activityData: Omit<TimelineActivity, 'id'>) => {
+    const newActivity: TimelineActivity = {
+      ...activityData,
+      id: `activity-${Date.now()}`
+    };
+    setActivities([...activities, newActivity]);
+    setShowCreateModal(false);
+  };
+
+  const handleUpdateActivity = (activityId: string, updates: Partial<TimelineActivity>) => {
+    setActivities(activities.map(activity => 
+      activity.id === activityId ? { ...activity, ...updates } : activity
+    ));
+    
+    // Also update the selected activity if it's being viewed
+    if (selectedActivity && selectedActivity.id === activityId) {
+      setSelectedActivity({ ...selectedActivity, ...updates });
+    }
+  };
+
+  const handleDeleteActivity = (activityId: string) => {
+    setActivities(activities.filter(activity => activity.id !== activityId));
+    if (selectedActivity && selectedActivity.id === activityId) {
+      setSelectedActivity(null);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Activity Timeline</h3>
-          <p className="text-sm text-gray-600">Maintenance, patrol, and trouble ticket activities</p>
-        </div>
-        <div className="flex items-center space-x-4 text-sm">
-          <div className="flex items-center space-x-2">
-            <Wrench className="h-4 w-4 text-blue-600" />
-            <span className="text-gray-700">Maintenance</span>
+    <>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-base font-semibold text-gray-900">Activity Timeline</h3>
+            <p className="text-xs text-gray-600">Recent maintenance, patrol, and trouble activities</p>
           </div>
-          <div className="flex items-center space-x-2">
-            <MapPin className="h-4 w-4 text-green-600" />
-            <span className="text-gray-700">Patrol</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-            <span className="text-gray-700">Trouble</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-8">
-        {timelineData.map((weekData) => (
-          <div key={weekData.week}>
-            <div className="flex items-center space-x-3 mb-4">
-              <h4 className="text-md font-semibold text-gray-900">{weekData.week}</h4>
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="text-sm text-gray-500">
-                {weekData.weekStart.toLocaleDateString()} - {new Date(weekData.weekStart.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString()}
-              </span>
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 text-xs">
+              <div className="flex items-center space-x-1">
+                <Wrench className="h-3 w-3 text-blue-600" />
+                <span className="text-gray-700">Maintenance</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <MapPin className="h-3 w-3 text-green-600" />
+                <span className="text-gray-700">Patrol</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <AlertTriangle className="h-3 w-3 text-red-600" />
+                <span className="text-gray-700">Trouble</span>
+              </div>
             </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center space-x-1 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+              <span>Add</span>
+            </button>
+          </div>
+        </div>
 
-            <div className="space-y-3">
-              {weekData.items.map((item, index) => {
-                const TypeIcon = getTypeIcon(item.type);
-                const StatusIcon = getStatusIcon(item.status);
-                const typeColor = getTypeColor(item.type);
-                const statusColor = getStatusColor(item.status);
+        <div className="space-y-4">
+          {timelineData.map((weekData) => (
+            <div key={weekData.week}>
+              <div className="flex items-center space-x-2 mb-2">
+                <h4 className="text-sm font-medium text-gray-900">{weekData.week}</h4>
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <span className="text-xs text-gray-500">
+                  {weekData.weekStart.toLocaleDateString()} - {new Date(weekData.weekStart.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                </span>
+              </div>
 
-                return (
-                  <div key={item.id} className="flex space-x-4">
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${typeColor}`}>
-                      <TypeIcon className="h-5 w-5" />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="bg-gray-50 rounded-lg p-4 hover:shadow-sm transition-shadow">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1 min-w-0">
-                            <h5 className="font-medium text-gray-900 truncate">{item.title}</h5>
-                            <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+              <div className="space-y-2">
+                {weekData.items.map((item) => {
+                  const TypeIcon = getTypeIcon(item.type);
+                  const StatusIcon = getStatusIcon(item.status);
+                  const typeColor = getTypeColor(item.type);
+                  const statusColor = getStatusColor(item.status);
+
+                  return (
+                    <div key={item.id} className="flex space-x-3">
+                      <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${typeColor}`}>
+                        <TypeIcon className="h-3 w-3" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="bg-gray-50 rounded p-3 hover:shadow-sm transition-shadow">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1 min-w-0">
+                              <h5 className="text-sm font-medium text-gray-900 truncate">{item.title}</h5>
+                              <p className="text-xs text-gray-600 mt-1">{item.description}</p>
+                            </div>
+                            <div className="flex items-center space-x-2 ml-2">
+                              <div className={`px-2 py-1 rounded border flex items-center space-x-1 ${statusColor} whitespace-nowrap`}>
+                                <StatusIcon className="h-3 w-3" />
+                                <span className="text-xs font-medium capitalize">
+                                  {item.status.replace('-', ' ')}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => setSelectedActivity(item)}
+                                className="p-1 text-gray-400 hover:text-blue-600 rounded"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </button>
+                            </div>
                           </div>
-                          <div className={`ml-4 px-3 py-1 rounded-full border flex items-center space-x-1 ${statusColor} whitespace-nowrap`}>
-                            <StatusIcon className="h-4 w-4" />
-                            <span className="text-sm font-medium capitalize">
-                              {item.status.replace('-', ' ')}
-                            </span>
-                          </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                          <div className="flex items-center space-x-2">
-                            <Calendar className="h-4 w-4 text-gray-400" />
-                            <div>
-                              <span className="text-gray-500">Date:</span>
-                              <span className="ml-1 font-medium text-gray-900">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="h-3 w-3 text-gray-400" />
+                              <span className="text-gray-500">
                                 {item.date.toLocaleDateString()}
                               </span>
                             </div>
-                          </div>
 
-                          <div className="flex items-center space-x-2">
-                            <MapPin className="h-4 w-4 text-gray-400" />
-                            <div>
-                              <span className="text-gray-500">Route:</span>
-                              <span className="ml-1 font-medium text-gray-900">
+                            <div className="flex items-center space-x-1">
+                              <MapPin className="h-3 w-3 text-gray-400" />
+                              <span className="text-gray-500 truncate">
                                 {getRouteName(item.routeId)}
                               </span>
                             </div>
-                          </div>
 
-                          <div className="flex items-center space-x-2">
-                            <User className="h-4 w-4 text-gray-400" />
-                            <div>
-                              <span className="text-gray-500">Technician:</span>
-                              <span className="ml-1 font-medium text-gray-900">{item.technician}</span>
+                            <div className="flex items-center space-x-1">
+                              <User className="h-3 w-3 text-gray-400" />
+                              <span className="text-gray-500 truncate">{item.technician}</span>
                             </div>
-                          </div>
 
-                          <div className="flex items-center space-x-2">
-                            <Clock className="h-4 w-4 text-gray-400" />
-                            <div>
-                              <span className="text-gray-500">Duration:</span>
-                              <span className="ml-1 font-medium text-gray-900">{item.duration}h</span>
+                            <div className="flex items-center space-x-1">
+                              <Clock className="h-3 w-3 text-gray-400" />
+                              <span className="text-gray-500">{item.duration}h</span>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-
-                    {/* Timeline connector */}
-                    {index < weekData.items.length - 1 && (
-                      <div className="absolute left-5 top-10 w-0.5 h-8 bg-gray-200" style={{ marginLeft: '20px' }} />
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+
+          {/* Custom Activities */}
+          {activities.length > 0 && (
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <h4 className="text-sm font-medium text-gray-900">Custom Activities</h4>
+                <div className="flex-1 h-px bg-gray-200"></div>
+              </div>
+              <div className="space-y-2">
+                {activities.map((item) => {
+                  const TypeIcon = getTypeIcon(item.type);
+                  const StatusIcon = getStatusIcon(item.status);
+                  const typeColor = getTypeColor(item.type);
+                  const statusColor = getStatusColor(item.status);
+
+                  return (
+                    <div key={item.id} className="flex space-x-3">
+                      <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${typeColor}`}>
+                        <TypeIcon className="h-3 w-3" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="bg-gray-50 rounded p-3 hover:shadow-sm transition-shadow">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1 min-w-0">
+                              <h5 className="text-sm font-medium text-gray-900 truncate">{item.title}</h5>
+                              <p className="text-xs text-gray-600 mt-1">{item.description}</p>
+                            </div>
+                            <div className="flex items-center space-x-2 ml-2">
+                              <div className={`px-2 py-1 rounded border flex items-center space-x-1 ${statusColor} whitespace-nowrap`}>
+                                <StatusIcon className="h-3 w-3" />
+                                <span className="text-xs font-medium capitalize">
+                                  {item.status.replace('-', ' ')}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => setSelectedActivity(item)}
+                                className="p-1 text-gray-400 hover:text-blue-600 rounded"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="h-3 w-3 text-gray-400" />
+                              <span className="text-gray-500">
+                                {item.date.toLocaleDateString()}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center space-x-1">
+                              <MapPin className="h-3 w-3 text-gray-400" />
+                              <span className="text-gray-500 truncate">
+                                {getRouteName(item.routeId)}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center space-x-1">
+                              <User className="h-3 w-3 text-gray-400" />
+                              <span className="text-gray-500 truncate">{item.technician}</span>
+                            </div>
+
+                            <div className="flex items-center space-x-1">
+                              <Clock className="h-3 w-3 text-gray-400" />
+                              <span className="text-gray-500">{item.duration}h</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Activity Detail Modal */}
+      {(selectedActivity || showCreateModal) && (
+        <ActivityDetailModal
+          activity={selectedActivity}
+          routes={routes}
+          isCreate={showCreateModal}
+          onClose={() => {
+            setSelectedActivity(null);
+            setShowCreateModal(false);
+          }}
+          onCreate={handleCreateActivity}
+          onUpdate={handleUpdateActivity}
+          onDelete={handleDeleteActivity}
+        />
+      )}
+    </>
   );
 }
