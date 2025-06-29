@@ -3,11 +3,20 @@ import Header from './components/Layout/Header';
 import Navigation from './components/Layout/Navigation';
 import Dashboard from './components/Dashboard/Dashboard';
 import RouteManagement from './components/Routes/RouteManagement';
+import AssetManagement from './components/Assets/AssetManagement';
 import MaintenanceScheduler from './components/Maintenance/MaintenanceScheduler';
 import MaintenanceList from './components/Maintenance/MaintenanceList';
 import TroubleTicketKanban from './components/TroubleTickets/TroubleTicketKanban';
-import { routes as initialRoutes, maintenanceRecords, alerts, slaWeeklyData, slaTargets, troubleTickets as initialTroubleTickets } from './data/mockData';
-import { Route, MaintenanceRecord, TroubleTicket } from './types';
+import { 
+  routes as initialRoutes, 
+  maintenanceRecords, 
+  alerts, 
+  slaWeeklyData, 
+  slaTargets, 
+  troubleTickets as initialTroubleTickets,
+  networkAssets as initialNetworkAssets
+} from './data/mockData';
+import { Route, MaintenanceRecord, TroubleTicket, NetworkAsset } from './types';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -15,6 +24,7 @@ function App() {
   const [maintenanceData, setMaintenanceData] = useState(maintenanceRecords);
   const [routes, setRoutes] = useState(initialRoutes);
   const [troubleTickets, setTroubleTickets] = useState(initialTroubleTickets);
+  const [networkAssets, setNetworkAssets] = useState(initialNetworkAssets);
 
   const activeAlerts = alerts.filter(alert => !alert.acknowledged).length;
   const totalTroubleTickets = routes.reduce((sum, route) => sum + route.troubleTickets, 0);
@@ -68,6 +78,24 @@ function App() {
     ));
   };
 
+  const handleCreateAsset = (assetData: Omit<NetworkAsset, 'id'>) => {
+    const newAsset: NetworkAsset = {
+      ...assetData,
+      id: `asset-${Date.now()}`
+    };
+    setNetworkAssets([...networkAssets, newAsset]);
+  };
+
+  const handleUpdateAsset = (assetId: string, updates: Partial<NetworkAsset>) => {
+    setNetworkAssets(networkAssets.map(asset => 
+      asset.id === assetId ? { ...asset, ...updates } : asset
+    ));
+  };
+
+  const handleDeleteAsset = (assetId: string) => {
+    setNetworkAssets(networkAssets.filter(asset => asset.id !== assetId));
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -87,6 +115,16 @@ function App() {
             onRouteUpdate={handleRouteUpdate}
             maintenanceRecords={maintenanceData}
             troubleTickets={troubleTickets}
+          />
+        );
+      case 'assets':
+        return (
+          <AssetManagement
+            routes={routes}
+            assets={networkAssets}
+            onCreateAsset={handleCreateAsset}
+            onUpdateAsset={handleUpdateAsset}
+            onDeleteAsset={handleDeleteAsset}
           />
         );
       case 'tickets':
