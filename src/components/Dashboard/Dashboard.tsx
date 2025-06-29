@@ -2,7 +2,6 @@ import React from 'react';
 import { Route, Alert, SLAData, SLATarget } from '../../types';
 import RouteCard from './RouteCard';
 import StatsOverview from './StatsOverview';
-import RecentAlerts from './RecentAlerts';
 import SLAChart from './SLAChart';
 import SLAKanban from './SLAKanban';
 
@@ -41,22 +40,17 @@ export default function Dashboard({ routes, alerts, slaData, slaTargets, onRoute
         totalTroubleTickets={totalTroubleTickets}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        <div className="lg:col-span-2">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Route Status</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {routes.map((route) => (
-              <RouteCard
-                key={route.id}
-                route={route}
-                onClick={() => onRouteSelect(route)}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <RecentAlerts alerts={alerts.slice(0, 5)} />
+      {/* Route Status Grid */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Route Status</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {routes.map((route) => (
+            <RouteCard
+              key={route.id}
+              route={route}
+              onClick={() => onRouteSelect(route)}
+            />
+          ))}
         </div>
       </div>
     </div>
