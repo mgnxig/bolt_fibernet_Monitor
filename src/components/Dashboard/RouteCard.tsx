@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route } from '../../types';
-import { MapPin, Calendar, Zap, Link, Signal, AlertCircle } from 'lucide-react';
+import { MapPin, Calendar, Zap, Signal, AlertCircle, TrendingUp, BarChart3 } from 'lucide-react';
 
 interface RouteCardProps {
   route: Route;
@@ -46,25 +46,44 @@ export default function RouteCard({ route, onClick }: RouteCardProps) {
   };
 
   const getLossColor = (loss: number) => {
-    if (loss <= 3) return 'text-green-600';
-    if (loss <= 5) return 'text-yellow-600';
+    if (loss <= 15) return 'text-green-600';
+    if (loss <= 25) return 'text-yellow-600';
     return 'text-red-600';
   };
 
   const getLossStatus = (loss: number) => {
-    if (loss <= 3) return 'Good';
-    if (loss <= 5) return 'Acceptable';
+    if (loss <= 15) return 'Good';
+    if (loss <= 25) return 'Acceptable';
     return 'High';
   };
 
   const totalLength = route.links.reduce((sum, link) => sum + link.length, 0);
-  const averageLoss = route.links.reduce((sum, link) => sum + link.totalLoss, 0) / route.links.length;
+  const totalLoss = route.links.reduce((sum, link) => sum + link.totalLoss, 0);
+  const totalAssets = route.assets.handhole + route.assets.odc + route.assets.pole + route.assets.jc;
+  
+  // Mock data for tickets this week vs last week
+  const ticketsThisWeek = Math.floor(route.troubleTickets * 0.6); // 60% of total tickets are from this week
+  const ticketsLastWeek = route.troubleTickets - ticketsThisWeek;
+  
+  // Mock SLA percentage (based on route status)
+  const averageSLA = route.status === 'operational' ? 99.2 :
+                    route.status === 'warning' ? 97.8 :
+                    route.status === 'maintenance' ? 95.5 :
+                    92.1; // critical
+
+  const getSLAColor = (sla: number) => {
+    if (sla >= 99) return 'text-green-600';
+    if (sla >= 97) return 'text-yellow-600';
+    if (sla >= 95) return 'text-orange-600';
+    return 'text-red-600';
+  };
 
   return (
     <div
       onClick={onClick}
       className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-blue-300"
     >
+      {/* Header with Route Name and Status */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">{route.name}</h3>
         <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(route.status)}`}>
@@ -72,94 +91,100 @@ export default function RouteCard({ route, onClick }: RouteCardProps) {
         </span>
       </div>
 
-      {/* Links Summary */}
-      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Link className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium text-gray-900">
-              {route.links.length} Link{route.links.length > 1 ? 's' : ''}
-            </span>
-          </div>
-          <span className="text-xs text-gray-500">Total: {totalLength.toFixed(1)} km</span>
-        </div>
-        <div className="space-y-1">
-          {route.links.map((link) => (
-            <div key={link.id} className="flex items-center justify-between text-xs">
-              <span className="text-gray-600">{link.name}</span>
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-500">{link.length} km</span>
-                <span className={`font-medium ${getLossColor(link.totalLoss)}`}>
-                  {link.totalLoss} dB
-                </span>
-                <span className={`px-1 py-0.5 rounded text-xs ${
-                  link.status === 'operational' ? 'bg-green-100 text-green-700' :
-                  link.status === 'warning' ? 'bg-yellow-100 text-yellow-700' :
-                  link.status === 'critical' ? 'bg-red-100 text-red-700' :
-                  'bg-blue-100 text-blue-700'
-                }`}>
-                  {link.status}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="flex items-center space-x-2">
-          <AlertCircle className={`h-4 w-4 ${getTroubleTicketColor(route.troubleTickets)}`} />
-          <div>
-            <p className="text-xs text-gray-500">Trouble Tickets</p>
-            <p className={`text-sm font-medium ${getTroubleTicketColor(route.troubleTickets)}`}>
-              {route.troubleTickets} Open
-            </p>
-          </div>
-        </div>
-
+      {/* Start - End Location */}
+      <div className="flex items-center justify-between mb-4 p-2 bg-gray-50 rounded-lg">
         <div className="flex items-center space-x-2">
           <MapPin className="h-4 w-4 text-gray-400" />
-          <div>
-            <p className="text-xs text-gray-500">Fiber Count</p>
-            <p className="text-sm font-medium text-gray-900">{route.fiberCount}</p>
+          <span className="text-sm text-gray-600">{route.location.start}</span>
+        </div>
+        <span className="text-gray-400">→</span>
+        <span className="text-sm text-gray-600">{route.location.end}</span>
+      </div>
+
+      {/* Key Metrics Grid */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        {/* Total Assets */}
+        <div className="text-center p-3 bg-blue-50 rounded-lg">
+          <div className="flex items-center justify-center mb-1">
+            <BarChart3 className="h-4 w-4 text-blue-600" />
           </div>
+          <p className="text-xs text-blue-600 font-medium">Total Assets</p>
+          <p className="text-lg font-bold text-blue-700">{totalAssets}</p>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Signal className={`h-4 w-4 ${getLossColor(averageLoss)}`} />
-          <div>
-            <p className="text-xs text-gray-500">Avg Loss</p>
-            <div className="flex items-center space-x-1">
-              <p className={`text-sm font-medium ${getLossColor(averageLoss)}`}>
-                {averageLoss.toFixed(1)} dB
-              </p>
-              <span className={`text-xs px-1 py-0.5 rounded ${
-                averageLoss <= 3 ? 'bg-green-100 text-green-700' :
-                averageLoss <= 5 ? 'bg-yellow-100 text-yellow-700' :
-                'bg-red-100 text-red-700'
-              }`}>
-                {getLossStatus(averageLoss)}
-              </span>
-            </div>
+        {/* Total Loss */}
+        <div className="text-center p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-center mb-1">
+            <Signal className={`h-4 w-4 ${getLossColor(totalLoss)}`} />
           </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-gray-400" />
-          <div>
-            <p className="text-xs text-gray-500">Next Maintenance</p>
-            <p className="text-sm font-medium text-gray-900">
-              {new Date(route.nextMaintenance).toLocaleDateString()}
+          <p className="text-xs text-gray-600 font-medium">Total Loss</p>
+          <div className="flex items-center justify-center space-x-1">
+            <p className={`text-lg font-bold ${getLossColor(totalLoss)}`}>
+              {totalLoss.toFixed(1)} dB
             </p>
           </div>
+          <span className={`text-xs px-1 py-0.5 rounded ${
+            totalLoss <= 15 ? 'bg-green-100 text-green-700' :
+            totalLoss <= 25 ? 'bg-yellow-100 text-yellow-700' :
+            'bg-red-100 text-red-700'
+          }`}>
+            {getLossStatus(totalLoss)}
+          </span>
+        </div>
+
+        {/* Average SLA */}
+        <div className="text-center p-3 bg-green-50 rounded-lg">
+          <div className="flex items-center justify-center mb-1">
+            <TrendingUp className={`h-4 w-4 ${getSLAColor(averageSLA)}`} />
+          </div>
+          <p className="text-xs text-green-600 font-medium">Average SLA</p>
+          <p className={`text-lg font-bold ${getSLAColor(averageSLA)}`}>
+            {averageSLA.toFixed(1)}%
+          </p>
+        </div>
+
+        {/* Trouble Tickets Comparison */}
+        <div className="text-center p-3 bg-orange-50 rounded-lg">
+          <div className="flex items-center justify-center mb-1">
+            <AlertCircle className={`h-4 w-4 ${getTroubleTicketColor(route.troubleTickets)}`} />
+          </div>
+          <p className="text-xs text-orange-600 font-medium">Tickets</p>
+          <div className="flex items-center justify-center space-x-1">
+            <span className="text-sm text-gray-500">{ticketsLastWeek}</span>
+            <span className="text-xs text-gray-400">→</span>
+            <span className={`text-lg font-bold ${getTroubleTicketColor(ticketsThisWeek)}`}>
+              {ticketsThisWeek}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500">Last → This Week</p>
         </div>
       </div>
 
-      <div className="border-t border-gray-100 pt-3">
-        <div className="flex justify-between text-xs text-gray-500">
-          <span>{route.location.start}</span>
-          <span>→</span>
-          <span>{route.location.end}</span>
+      {/* Additional Info */}
+      <div className="grid grid-cols-3 gap-3 text-sm border-t border-gray-100 pt-3">
+        <div className="text-center">
+          <p className="text-gray-500">Links</p>
+          <p className="font-medium text-gray-900">{route.links.length}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-gray-500">Length</p>
+          <p className="font-medium text-gray-900">{totalLength.toFixed(1)} km</p>
+        </div>
+        <div className="text-center">
+          <p className="text-gray-500">Fibers</p>
+          <p className="font-medium text-gray-900">{route.fiberCount}</p>
+        </div>
+      </div>
+
+      {/* Next Maintenance */}
+      <div className="border-t border-gray-100 pt-3 mt-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Calendar className="h-4 w-4 text-gray-400" />
+            <span className="text-xs text-gray-500">
+              Next Maintenance: {new Date(route.nextMaintenance).toLocaleDateString()}
+            </span>
+          </div>
         </div>
       </div>
     </div>
