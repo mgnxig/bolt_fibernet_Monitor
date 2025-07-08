@@ -4,7 +4,7 @@ import {
   Network, Edit3, Save, X, Plus, Trash2, Eye, 
   ArrowRight, ArrowLeft, Settings, Activity,
   Signal, MapPin, Zap, Cable, Monitor,
-  RotateCcw, Download, Upload, RefreshCw
+  RotateCcw, Download, Upload, RefreshCw, BarChart3
 } from 'lucide-react';
 import RouteConfigurationDiagram from './RouteConfigurationDiagram';
 import TrafficTable from './TrafficTable';
