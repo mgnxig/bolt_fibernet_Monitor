@@ -3,6 +3,7 @@ import Header from './components/Layout/Header';
 import Navigation from './components/Layout/Navigation';
 import Dashboard from './components/Dashboard/Dashboard';
 import RouteManagement from './components/Routes/RouteManagement';
+import CoreManagement from './components/CoreManagement/CoreManagement';
 import AssetManagement from './components/Assets/AssetManagement';
 import TroubleTicketManagement from './components/TroubleTickets/TroubleTicketManagement';
 import { 
@@ -120,6 +121,13 @@ function App() {
             onRouteUpdate={handleRouteUpdate}
             maintenanceRecords={maintenanceData}
             troubleTickets={troubleTickets}
+          />
+        );
+      case 'core':
+        return (
+          <CoreManagement
+            routes={routes}
+            onRouteUpdate={handleRouteUpdate}
           />
         );
       case 'assets':
