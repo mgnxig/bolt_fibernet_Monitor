@@ -13,10 +13,13 @@ interface TrafficData {
   rsl: number;
   otdrDistance: number;
   portNumber: string;
-  sourceRoute: string;
-  destinationRoute: string;
+  linkPointA: string;
+  linkPointB: string;
+  selectedRoute: string;
   status: 'active' | 'inactive' | 'maintenance' | 'error';
-  bandwidth: string;
+  totalLoss: number;
+  lossPerKm: number;
+  length: number;
   protocol: string;
 }
 
@@ -84,8 +87,9 @@ export default function RouteConfigurationDiagram({
       const routeTraffic = trafficData.filter(t => t.routeId === route.id);
       
       routeTraffic.forEach(traffic => {
-        const sourceRoute = routes.find(r => r.name === traffic.sourceRoute);
-        const targetRoute = routes.find(r => r.name === traffic.destinationRoute);
+        // Map selected route to actual route
+        const sourceRoute = route; // Current route
+        const targetRoute = routes.find(r => r.name.includes(traffic.selectedRoute));
         
         if (sourceRoute && targetRoute && sourceRoute.id !== targetRoute.id) {
           const connectionKey = `${sourceRoute.id}-${targetRoute.id}`;
@@ -99,10 +103,9 @@ export default function RouteConfigurationDiagram({
             const existing = connectionMap.get(existingKey)!;
             existing.trafficCount += 1;
             
-            // Update bandwidth (sum up)
-            const existingBW = parseFloat(existing.bandwidth.replace(/[^\d.]/g, ''));
-            const newBW = parseFloat(traffic.bandwidth.replace(/[^\d.]/g, ''));
-            existing.bandwidth = `${(existingBW + newBW).toFixed(1)} Gbps`;
+            // Update total loss (sum up)
+            const existingLoss = parseFloat(existing.bandwidth.replace(/[^\d.]/g, ''));
+            existing.bandwidth = `${(existingLoss + traffic.totalLoss).toFixed(1)} dB`;
             
             // Update status (worst case)
             if (traffic.status === 'error' || existing.status === 'error') {
@@ -118,7 +121,7 @@ export default function RouteConfigurationDiagram({
               trafficCount: 1,
               status: traffic.status === 'active' ? 'active' : 
                      traffic.status === 'error' ? 'error' : 'warning',
-              bandwidth: traffic.bandwidth
+              bandwidth: `${traffic.totalLoss.toFixed(1)} dB`
             });
           }
         }
@@ -228,7 +231,7 @@ export default function RouteConfigurationDiagram({
           fill="#374151"
           className="pointer-events-none"
         >
-          {connection.bandwidth}
+          Loss: {connection.bandwidth}
         </text>
         <text
           x={(sourcePos.x + targetPos.x) / 2}

@@ -21,10 +21,13 @@ interface TrafficData {
   rsl: number; // Received Signal Level in dBm
   otdrDistance: number; // in km
   portNumber: string;
-  sourceRoute: string;
-  destinationRoute: string;
+  linkPointA: string; // Source point
+  linkPointB: string; // Destination point
+  selectedRoute: string; // Single route selection (A, B, C, D, E, F)
   status: 'active' | 'inactive' | 'maintenance' | 'error';
-  bandwidth: string;
+  totalLoss: number; // in dB
+  lossPerKm: number; // in dB/km
+  length: number; // in km
   protocol: string;
   lastUpdate: string;
 }
@@ -38,10 +41,13 @@ const mockTrafficData: TrafficData[] = [
     rsl: -15.2,
     otdrDistance: 12.5,
     portNumber: 'P1-01',
-    sourceRoute: 'Route A',
-    destinationRoute: 'Route B',
+    linkPointA: 'HUB-A',
+    linkPointB: 'TERM-B',
+    selectedRoute: 'A',
     status: 'active',
-    bandwidth: '10 Gbps',
+    totalLoss: 2.3,
+    lossPerKm: 0.18,
+    length: 12.5,
     protocol: 'Ethernet',
     lastUpdate: '2024-02-20T10:30:00Z'
   },
@@ -52,10 +58,13 @@ const mockTrafficData: TrafficData[] = [
     rsl: -18.7,
     otdrDistance: 12.5,
     portNumber: 'P1-02',
-    sourceRoute: 'Route A',
-    destinationRoute: 'Route C',
+    linkPointA: 'HUB-A',
+    linkPointB: 'TERM-C',
+    selectedRoute: 'C',
     status: 'active',
-    bandwidth: '1 Gbps',
+    totalLoss: 3.1,
+    lossPerKm: 0.25,
+    length: 12.5,
     protocol: 'TDM',
     lastUpdate: '2024-02-20T10:25:00Z'
   },
@@ -66,10 +75,13 @@ const mockTrafficData: TrafficData[] = [
     rsl: -22.1,
     otdrDistance: 12.5,
     portNumber: 'P1-03',
-    sourceRoute: 'Route A',
-    destinationRoute: 'Route D',
+    linkPointA: 'HUB-A',
+    linkPointB: 'TERM-D',
+    selectedRoute: 'D',
     status: 'maintenance',
-    bandwidth: '2.5 Gbps',
+    totalLoss: 4.2,
+    lossPerKm: 0.34,
+    length: 12.5,
     protocol: 'SDH',
     lastUpdate: '2024-02-20T09:15:00Z'
   },
@@ -80,10 +92,13 @@ const mockTrafficData: TrafficData[] = [
     rsl: -16.8,
     otdrDistance: 16.1,
     portNumber: 'P2-01',
-    sourceRoute: 'Route B',
-    destinationRoute: 'Route A',
+    linkPointA: 'HUB-B',
+    linkPointB: 'TERM-A',
+    selectedRoute: 'B',
     status: 'active',
-    bandwidth: '40 Gbps',
+    totalLoss: 3.8,
+    lossPerKm: 0.24,
+    length: 16.1,
     protocol: 'Ethernet',
     lastUpdate: '2024-02-20T10:35:00Z'
   },
@@ -94,10 +109,13 @@ const mockTrafficData: TrafficData[] = [
     rsl: -19.3,
     otdrDistance: 16.1,
     portNumber: 'P2-02',
-    sourceRoute: 'Route B',
-    destinationRoute: 'Route F',
+    linkPointA: 'HUB-B',
+    linkPointB: 'TERM-F',
+    selectedRoute: 'F',
     status: 'active',
-    bandwidth: '100 Gbps',
+    totalLoss: 4.1,
+    lossPerKm: 0.25,
+    length: 16.1,
     protocol: 'Ethernet',
     lastUpdate: '2024-02-20T10:40:00Z'
   },
@@ -108,10 +126,13 @@ const mockTrafficData: TrafficData[] = [
     rsl: -20.5,
     otdrDistance: 9.2,
     portNumber: 'P3-01',
-    sourceRoute: 'Route C',
-    destinationRoute: 'Route A',
+    linkPointA: 'HUB-C',
+    linkPointB: 'TERM-A',
+    selectedRoute: 'C',
     status: 'error',
-    bandwidth: '5 Gbps',
+    totalLoss: 5.2,
+    lossPerKm: 0.57,
+    length: 9.2,
     protocol: 'MPLS',
     lastUpdate: '2024-02-20T08:20:00Z'
   },
@@ -122,10 +143,13 @@ const mockTrafficData: TrafficData[] = [
     rsl: -14.1,
     otdrDistance: 13.8,
     portNumber: 'P4-01',
-    sourceRoute: 'Route D',
-    destinationRoute: 'Route E',
+    linkPointA: 'HUB-D',
+    linkPointB: 'TERM-E',
+    selectedRoute: 'D',
     status: 'active',
-    bandwidth: '25 Gbps',
+    totalLoss: 1.9,
+    lossPerKm: 0.14,
+    length: 13.8,
     protocol: 'Ethernet',
     lastUpdate: '2024-02-20T10:45:00Z'
   },
@@ -136,10 +160,13 @@ const mockTrafficData: TrafficData[] = [
     rsl: -25.8,
     otdrDistance: 14.5,
     portNumber: 'P5-01',
-    sourceRoute: 'Route E',
-    destinationRoute: 'Route D',
+    linkPointA: 'HUB-E',
+    linkPointB: 'TERM-D',
+    selectedRoute: 'E',
     status: 'error',
-    bandwidth: '1 Gbps',
+    totalLoss: 6.7,
+    lossPerKm: 0.46,
+    length: 14.5,
     protocol: 'Ethernet',
     lastUpdate: '2024-02-20T07:30:00Z'
   },
@@ -150,10 +177,13 @@ const mockTrafficData: TrafficData[] = [
     rsl: -17.6,
     otdrDistance: 17.6,
     portNumber: 'P6-01',
-    sourceRoute: 'Route F',
-    destinationRoute: 'Route B',
+    linkPointA: 'HUB-F',
+    linkPointB: 'TERM-B',
+    selectedRoute: 'F',
     status: 'active',
-    bandwidth: '10 Gbps',
+    totalLoss: 2.8,
+    lossPerKm: 0.16,
+    length: 17.6,
     protocol: 'GPON',
     lastUpdate: '2024-02-20T10:50:00Z'
   }
@@ -181,10 +211,7 @@ export default function CoreManagement({ routes, onRouteUpdate }: CoreManagement
   const getRouteStats = (routeId: string) => {
     const routeTraffic = getRouteTraffic(routeId);
     const activeTraffic = routeTraffic.filter(t => t.status === 'active');
-    const totalBandwidth = routeTraffic.reduce((sum, traffic) => {
-      const bandwidth = parseFloat(traffic.bandwidth.replace(/[^\d.]/g, ''));
-      return sum + bandwidth;
-    }, 0);
+    const totalLoss = routeTraffic.reduce((sum, traffic) => sum + traffic.totalLoss, 0);
     const avgRSL = routeTraffic.length > 0 
       ? routeTraffic.reduce((sum, traffic) => sum + traffic.rsl, 0) / routeTraffic.length 
       : 0;
@@ -192,7 +219,7 @@ export default function CoreManagement({ routes, onRouteUpdate }: CoreManagement
     return {
       totalTraffic: routeTraffic.length,
       activeTraffic: activeTraffic.length,
-      totalBandwidth: totalBandwidth,
+      totalLoss: totalLoss,
       avgRSL: avgRSL
     };
   };
@@ -345,8 +372,8 @@ export default function CoreManagement({ routes, onRouteUpdate }: CoreManagement
                     <span className="text-sm font-medium text-green-600">{stats.activeTraffic}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Total Bandwidth:</span>
-                    <span className="text-sm font-medium text-gray-900">{stats.totalBandwidth.toFixed(1)} Gbps</span>
+                    <span className="text-sm text-gray-600">Total Loss:</span>
+                    <span className="text-sm font-medium text-gray-900">{stats.totalLoss.toFixed(1)} dB</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Avg RSL:</span>

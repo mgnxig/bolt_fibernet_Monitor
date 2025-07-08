@@ -11,13 +11,16 @@ interface TrafficData {
   id: string;
   routeId: string;
   trafficName: string;
-  rsl: number;
-  otdrDistance: number;
+  rsl: number; // Received Signal Level in dBm
+  otdrDistance: number; // in km
   portNumber: string;
-  sourceRoute: string;
-  destinationRoute: string;
+  linkPointA: string; // Source point
+  linkPointB: string; // Destination point
+  selectedRoute: string; // Single route selection (A, B, C, D, E, F)
   status: 'active' | 'inactive' | 'maintenance' | 'error';
-  bandwidth: string;
+  totalLoss: number; // in dB
+  lossPerKm: number; // in dB/km
+  length: number; // in km
   protocol: string;
   lastUpdate: string;
 }
@@ -74,12 +77,35 @@ export default function TrafficTable({
     return 'Poor';
   };
 
+  const refreshTraffic = () => {
+    // Simulate refresh with small RSL variations
+    const refreshedTraffic = trafficData.map(traffic => ({
+      ...traffic,
+      rsl: traffic.rsl + (Math.random() - 0.5) * 0.5,
+      lastUpdate: new Date().toISOString()
+    }));
+    onTrafficUpdate(refreshedTraffic);
+  };
+
+  const trafficStats = {
+    total: trafficData.length,
+    active: trafficData.filter(t => t.status === 'active').length,
+    error: trafficData.filter(t => t.status === 'error').length,
+    avgRSL: trafficData.length > 0 ? trafficData.reduce((sum, t) => sum + t.rsl, 0) / trafficData.length : 0,
+    avgTotalLoss: trafficData.length > 0 ? trafficData.reduce((sum, t) => sum + t.totalLoss, 0) / trafficData.length : 0,
+    avgLossPerKm: trafficData.length > 0 ? trafficData.reduce((sum, t) => sum + t.lossPerKm, 0) / trafficData.length : 0,
+    totalLength: trafficData.reduce((sum, t) => sum + t.length, 0)
+  };
+
+  const routeOptions = ['A', 'B', 'C', 'D', 'E', 'F'];
+
   const filteredTraffic = trafficData.filter(traffic => {
     const matchesSearch = searchTerm === '' || 
       traffic.trafficName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       traffic.portNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      traffic.sourceRoute.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      traffic.destinationRoute.toLowerCase().includes(searchTerm.toLowerCase());
+      traffic.linkPointA.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      traffic.linkPointB.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      traffic.selectedRoute.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || traffic.status === statusFilter;
     
@@ -128,17 +154,20 @@ export default function TrafficTable({
       rsl: -20,
       otdrDistance: 0,
       portNumber: '',
-      sourceRoute: route.name,
-      destinationRoute: '',
+      linkPointA: '',
+      linkPointB: '',
+      selectedRoute: 'A',
       status: 'active',
-      bandwidth: '1 Gbps',
+      totalLoss: 0,
+      lossPerKm: 0,
+      length: 0,
       protocol: 'Ethernet',
       lastUpdate: new Date().toISOString()
     });
   };
 
   const saveNewTraffic = () => {
-    if (newTraffic && newTraffic.trafficName && newTraffic.portNumber && newTraffic.destinationRoute) {
+    if (newTraffic && newTraffic.trafficName && newTraffic.portNumber && newTraffic.linkPointA && newTraffic.linkPointB) {
       const traffic: TrafficData = {
         id: `traffic-${Date.now()}`,
         routeId: route.id,
@@ -146,10 +175,13 @@ export default function TrafficTable({
         rsl: newTraffic.rsl || -20,
         otdrDistance: newTraffic.otdrDistance || 0,
         portNumber: newTraffic.portNumber,
-        sourceRoute: newTraffic.sourceRoute || route.name,
-        destinationRoute: newTraffic.destinationRoute,
+        linkPointA: newTraffic.linkPointA,
+        linkPointB: newTraffic.linkPointB,
+        selectedRoute: newTraffic.selectedRoute || 'A',
         status: newTraffic.status || 'active',
-        bandwidth: newTraffic.bandwidth || '1 Gbps',
+        totalLoss: newTraffic.totalLoss || 0,
+        lossPerKm: newTraffic.lossPerKm || 0,
+        length: newTraffic.length || 0,
         protocol: newTraffic.protocol || 'Ethernet',
         lastUpdate: new Date().toISOString()
       };
@@ -166,27 +198,6 @@ export default function TrafficTable({
 
   const updateNewTraffic = (field: string, value: any) => {
     setNewTraffic(prev => prev ? { ...prev, [field]: value } : null);
-  };
-
-  const refreshTraffic = () => {
-    // Simulate refresh with small RSL variations
-    const refreshedTraffic = trafficData.map(traffic => ({
-      ...traffic,
-      rsl: traffic.rsl + (Math.random() - 0.5) * 0.5,
-      lastUpdate: new Date().toISOString()
-    }));
-    onTrafficUpdate(refreshedTraffic);
-  };
-
-  const trafficStats = {
-    total: trafficData.length,
-    active: trafficData.filter(t => t.status === 'active').length,
-    error: trafficData.filter(t => t.status === 'error').length,
-    avgRSL: trafficData.length > 0 ? trafficData.reduce((sum, t) => sum + t.rsl, 0) / trafficData.length : 0,
-    totalBandwidth: trafficData.reduce((sum, traffic) => {
-      const bandwidth = parseFloat(traffic.bandwidth.replace(/[^\d.]/g, ''));
-      return sum + bandwidth;
-    }, 0)
   };
 
   return (
@@ -219,7 +230,7 @@ export default function TrafficTable({
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
           <div className="bg-gray-50 rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-1">
               <Activity className="h-4 w-4 text-blue-600" />
@@ -256,10 +267,18 @@ export default function TrafficTable({
 
           <div className="bg-indigo-50 rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-1">
-              <BarChart3 className="h-4 w-4 text-indigo-600" />
-              <span className="text-sm font-medium text-gray-700">Total BW</span>
+              <Signal className="h-4 w-4 text-indigo-600" />
+              <span className="text-sm font-medium text-gray-700">Avg Loss/km</span>
             </div>
-            <p className="text-2xl font-bold text-indigo-600">{trafficStats.totalBandwidth.toFixed(1)} Gbps</p>
+            <p className="text-2xl font-bold text-indigo-600">{trafficStats.avgLossPerKm.toFixed(2)} dB/km</p>
+          </div>
+
+          <div className="bg-yellow-50 rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-1">
+              <MapPin className="h-4 w-4 text-yellow-600" />
+              <span className="text-sm font-medium text-gray-700">Total Length</span>
+            </div>
+            <p className="text-2xl font-bold text-yellow-600">{trafficStats.totalLength.toFixed(1)} km</p>
           </div>
         </div>
 
@@ -310,16 +329,22 @@ export default function TrafficTable({
                   Port Number
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Route Path
+                  Link Points
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Route
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   RSL (dBm)
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  OTDR Distance
+                  Length (km)
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Bandwidth
+                  Total Loss (dB)
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Loss/km (dB/km)
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -353,19 +378,33 @@ export default function TrafficTable({
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">{route.name}</span>
+                      <input
+                        type="text"
+                        value={newTraffic.linkPointA || ''}
+                        onChange={(e) => updateNewTraffic('linkPointA', e.target.value)}
+                        placeholder="Point A"
+                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
+                      />
                       <ArrowRight className="h-3 w-3 text-gray-400" />
-                      <select
-                        value={newTraffic.destinationRoute || ''}
-                        onChange={(e) => updateNewTraffic('destinationRoute', e.target.value)}
-                        className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
-                      >
-                        <option value="">Select destination</option>
-                        {allRoutes.filter(r => r.id !== route.id).map(r => (
-                          <option key={r.id} value={r.name}>{r.name}</option>
-                        ))}
-                      </select>
+                      <input
+                        type="text"
+                        value={newTraffic.linkPointB || ''}
+                        onChange={(e) => updateNewTraffic('linkPointB', e.target.value)}
+                        placeholder="Point B"
+                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
+                      />
                     </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <select
+                      value={newTraffic.selectedRoute || 'A'}
+                      onChange={(e) => updateNewTraffic('selectedRoute', e.target.value)}
+                      className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
+                    >
+                      {routeOptions.map(option => (
+                        <option key={option} value={option}>Route {option}</option>
+                      ))}
+                    </select>
                   </td>
                   <td className="px-6 py-4">
                     <input
@@ -380,17 +419,27 @@ export default function TrafficTable({
                     <input
                       type="number"
                       step="0.1"
-                      value={newTraffic.otdrDistance || 0}
-                      onChange={(e) => updateNewTraffic('otdrDistance', parseFloat(e.target.value) || 0)}
+                      value={newTraffic.length || 0}
+                      onChange={(e) => updateNewTraffic('length', parseFloat(e.target.value) || 0)}
                       className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
                     />
                   </td>
                   <td className="px-6 py-4">
                     <input
-                      type="text"
-                      value={newTraffic.bandwidth || '1 Gbps'}
-                      onChange={(e) => updateNewTraffic('bandwidth', e.target.value)}
-                      className="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
+                      type="number"
+                      step="0.1"
+                      value={newTraffic.totalLoss || 0}
+                      onChange={(e) => updateNewTraffic('totalLoss', parseFloat(e.target.value) || 0)}
+                      className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
+                    />
+                  </td>
+                  <td className="px-6 py-4">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={newTraffic.lossPerKm || 0}
+                      onChange={(e) => updateNewTraffic('lossPerKm', parseFloat(e.target.value) || 0)}
+                      className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
                     />
                   </td>
                   <td className="px-6 py-4">
@@ -464,25 +513,43 @@ export default function TrafficTable({
                     
                     <td className="px-6 py-4 whitespace-nowrap">
                       {isEditing ? (
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-600">{traffic.sourceRoute}</span>
+                        <div className="flex items-center space-x-1">
+                          <input
+                            type="text"
+                            value={editingData?.linkPointA || ''}
+                            onChange={(e) => updateEditingData('linkPointA', e.target.value)}
+                            className="w-16 px-1 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                          />
                           <ArrowRight className="h-3 w-3 text-gray-400" />
-                          <select
-                            value={editingData?.destinationRoute || ''}
-                            onChange={(e) => updateEditingData('destinationRoute', e.target.value)}
-                            className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
-                          >
-                            {allRoutes.filter(r => r.name !== traffic.sourceRoute).map(r => (
-                              <option key={r.id} value={r.name}>{r.name}</option>
-                            ))}
-                          </select>
+                          <input
+                            type="text"
+                            value={editingData?.linkPointB || ''}
+                            onChange={(e) => updateEditingData('linkPointB', e.target.value)}
+                            className="w-16 px-1 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
+                          />
                         </div>
                       ) : (
                         <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-900">{traffic.sourceRoute}</span>
+                          <span className="text-sm text-gray-900">{traffic.linkPointA}</span>
                           <ArrowRight className="h-3 w-3 text-gray-400" />
-                          <span className="text-sm text-gray-900">{traffic.destinationRoute}</span>
+                          <span className="text-sm text-gray-900">{traffic.linkPointB}</span>
                         </div>
+                      )}
+                    </td>
+                    
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {isEditing ? (
+                        <select
+                          value={editingData?.selectedRoute || 'A'}
+                          onChange={(e) => updateEditingData('selectedRoute', e.target.value)}
+                          className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
+                        >
+                          {routeOptions.map(option => (
+                            <option key={option} value={option}>Route {option}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-sm font-medium text-gray-900">Route {traffic.selectedRoute}</span>
                       )}
                     </td>
                     
@@ -512,25 +579,40 @@ export default function TrafficTable({
                         <input
                           type="number"
                           step="0.1"
-                          value={editingData?.otdrDistance || 0}
-                          onChange={(e) => updateEditingData('otdrDistance', parseFloat(e.target.value) || 0)}
+                          value={editingData?.length || 0}
+                          onChange={(e) => updateEditingData('length', parseFloat(e.target.value) || 0)}
                           className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
                         />
                       ) : (
-                        <span className="text-sm text-gray-900">{traffic.otdrDistance.toFixed(1)} km</span>
+                        <span className="text-sm text-gray-900">{traffic.length.toFixed(1)} km</span>
                       )}
                     </td>
                     
                     <td className="px-6 py-4 whitespace-nowrap">
                       {isEditing ? (
                         <input
-                          type="text"
-                          value={editingData?.bandwidth || ''}
-                          onChange={(e) => updateEditingData('bandwidth', e.target.value)}
-                          className="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
+                          type="number"
+                          step="0.1"
+                          value={editingData?.totalLoss || 0}
+                          onChange={(e) => updateEditingData('totalLoss', parseFloat(e.target.value) || 0)}
+                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
                         />
                       ) : (
-                        <span className="text-sm text-gray-900">{traffic.bandwidth}</span>
+                        <span className="text-sm text-gray-900">{traffic.totalLoss.toFixed(1)} dB</span>
+                      )}
+                    </td>
+                    
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={editingData?.lossPerKm || 0}
+                          onChange={(e) => updateEditingData('lossPerKm', parseFloat(e.target.value) || 0)}
+                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
+                        />
+                      ) : (
+                        <span className="text-sm text-gray-900">{traffic.lossPerKm.toFixed(2)} dB/km</span>
                       )}
                     </td>
                     
@@ -650,8 +732,18 @@ export default function TrafficTable({
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Bandwidth</label>
-                  <p className="text-lg text-gray-900">{selectedTraffic.bandwidth}</p>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Total Loss</label>
+                  <p className="text-lg text-gray-900">{selectedTraffic.totalLoss.toFixed(1)} dB</p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Loss per km</label>
+                  <p className="text-lg text-gray-900">{selectedTraffic.lossPerKm.toFixed(2)} dB/km</p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Length</label>
+                  <p className="text-lg text-gray-900">{selectedTraffic.length.toFixed(1)} km</p>
                 </div>
                 
                 <div>
@@ -667,17 +759,17 @@ export default function TrafficTable({
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">OTDR Distance</label>
-                  <p className="text-lg text-gray-900">{selectedTraffic.otdrDistance.toFixed(1)} km</p>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Selected Route</label>
+                  <p className="text-lg text-gray-900">Route {selectedTraffic.selectedRoute}</p>
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Route Path</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Link Points</label>
                 <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <span className="text-lg text-gray-900">{selectedTraffic.sourceRoute}</span>
+                  <span className="text-lg text-gray-900">{selectedTraffic.linkPointA}</span>
                   <ArrowRight className="h-5 w-5 text-gray-400" />
-                  <span className="text-lg text-gray-900">{selectedTraffic.destinationRoute}</span>
+                  <span className="text-lg text-gray-900">{selectedTraffic.linkPointB}</span>
                 </div>
               </div>
               
